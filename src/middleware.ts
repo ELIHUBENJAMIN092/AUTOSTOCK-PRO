@@ -5,7 +5,7 @@ export default withAuth(
   function middleware(req) {
     const token = req.nextauth.token;
 
-    // 🔒 Si intenta entrar a /admin sin ser admin
+    // 🔒 Protege /admin solo para admins
     if (req.nextUrl.pathname.startsWith("/admin")) {
       if (token?.role !== "admin") {
         return NextResponse.redirect(new URL("/", req.url));
@@ -16,12 +16,11 @@ export default withAuth(
   },
   {
     callbacks: {
-      authorized: ({ token }) => !!token, // Debe estar logueado
+      authorized: ({ token }) => Boolean(token), // 👈 CLAVE
     },
   }
 );
 
-// Rutas protegidas
 export const config = {
   matcher: ["/admin/:path*"],
 };

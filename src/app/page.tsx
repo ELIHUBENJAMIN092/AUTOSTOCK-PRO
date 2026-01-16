@@ -65,7 +65,7 @@ export default function HomePage() {
           <a href="#categorias" className="text-sm hover:text-white text-neutral-300 transition-colors">Categorías</a>
           <a href="#contacto" className="text-sm hover:text-white text-neutral-300 transition-colors">Contacto</a>
         </nav>
-        <a href="/admin" className="px-4 py-2 bg-white text-neutral-950 font-semibold rounded-full hover:shadow-lg transition-all duration-200">Panel Administrativo</a>
+        <a href="/admin" className="px-4 py-2 bg-white text-neutral-950 font-semibold rounded-full hover:shadow-lg transition-all duration-200">Administrador</a>
       </header>
 
       <section className="container mx-auto px-4 flex flex-col lg:flex-row items-center gap-8 lg:gap-12 py-12">

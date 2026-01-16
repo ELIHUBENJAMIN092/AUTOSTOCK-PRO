@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ImageIcon } from "lucide-react";
+
 
 type Category = {
   _id: string;
@@ -18,6 +20,7 @@ type Product = {
   minStock?: number;
   isActive?: boolean;
   category?: Category;
+  image?: string;
 };
 
 export default function ProductsPage() {
@@ -33,6 +36,9 @@ export default function ProductsPage() {
   const [stock, setStock] = useState("0");
   const [category, setCategory] = useState("");
   const [error, setError] = useState("");
+
+  // 📸 Imagen (PASO 2)
+  const [image, setImage] = useState<File | null>(null);
 
   // 🔹 Editar (MODAL)
   const [editProduct, setEditProduct] = useState<Product | null>(null);
@@ -69,6 +75,7 @@ export default function ProductsPage() {
       return;
     }
 
+    // ⚠️ AÚN NO enviamos imagen (eso es PASO 3)
     const res = await fetch("/api/products", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -94,6 +101,8 @@ export default function ProductsPage() {
     setPrice("");
     setStock("0");
     setCategory("");
+    setImage(null);
+
     fetchProducts();
   };
 
@@ -147,59 +156,119 @@ export default function ProductsPage() {
 
         <form
           onSubmit={createProduct}
-          className="grid grid-cols-1 md:grid-cols-2 gap-4"
+          className="grid grid-cols-1 md:grid-cols-3 gap-6"
         >
-          <input
-            type="text"
-            placeholder="Código"
-            value={code}
-            onChange={(e) => setCode(e.target.value)}
-            className="px-4 py-2 bg-neutral-800 rounded text-white"
-          />
-          <input
-            type="text"
-            placeholder="Nombre"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="px-4 py-2 bg-neutral-800 rounded text-white"
-          />
-          <input
-            type="text"
-            placeholder="Descripción"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="px-4 py-2 bg-neutral-800 rounded text-white md:col-span-2"
-          />
-          <input
-            type="number"
-            placeholder="Precio"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            className="px-4 py-2 bg-neutral-800 rounded text-white"
-          />
-          <input
-            type="number"
-            placeholder="Stock"
-            value={stock}
-            onChange={(e) => setStock(e.target.value)}
-            className="px-4 py-2 bg-neutral-800 rounded text-white"
-          />
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className="px-4 py-2 bg-neutral-800 rounded text-white"
-          >
-            <option value="">Selecciona categoría</option>
-            {categories.map((c) => (
-              <option key={c._id} value={c._id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
+          {/* 🧾 DATOS PRODUCTO */}
+          <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input
+              type="text"
+              placeholder="Código"
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              className="px-4 py-2 bg-neutral-800 rounded text-white"
+            />
+            <input
+              type="text"
+              placeholder="Nombre"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="px-4 py-2 bg-neutral-800 rounded text-white"
+            />
 
+            <input
+              type="text"
+              placeholder="Descripción"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="px-4 py-2 bg-neutral-800 rounded text-white md:col-span-2"
+            />
+
+            <input
+              type="number"
+              placeholder="Precio"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              className="px-4 py-2 bg-neutral-800 rounded text-white"
+            />
+            <input
+              type="number"
+              placeholder="Stock"
+              value={stock}
+              onChange={(e) => setStock(e.target.value)}
+              className="px-4 py-2 bg-neutral-800 rounded text-white"
+            />
+
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="px-4 py-2 bg-neutral-800 rounded text-white md:col-span-2"
+            >
+              <option value="">Selecciona categoría</option>
+              {categories.map((c) => (
+                <option key={c._id} value={c._id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* 🖼️ IMAGEN */}
+          <div className="flex justify-center">
+            <input
+              type="file"
+              id="imageUpload"
+              accept="image/*"
+              hidden
+              onChange={(e) => {
+                if (e.target.files && e.target.files[0]) {
+                  setImage(e.target.files[0]);
+                }
+              }}
+            />
+
+            {!image ? (
+              /* ⬆️ CUADRO SUBIR */
+              <label
+                htmlFor="imageUpload"
+                className="w-44 h-44 flex flex-col items-center justify-center
+        border-2 border-dashed border-neutral-600
+        rounded-xl cursor-pointer
+        hover:border-white hover:bg-neutral-800
+        transition text-neutral-400 hover:text-white"
+              >
+                <ImageIcon size={40} />
+                <span className="text-sm mt-2">Subir imagen</span>
+              </label>
+            ) : (
+              /* 🖼️ PREVIEW REEMPLAZA EL CUADRO */
+              <div className="relative w-44 h-44">
+                <img
+                  src={URL.createObjectURL(image)}
+                  alt="Preview"
+                  className="w-full h-full object-cover rounded-xl border border-neutral-700"
+                />
+
+                {/* ❌ BOTÓN BORRAR */}
+                <button
+                  type="button"
+                  onClick={() => setImage(null)}
+                  className="absolute top-2 right-2 bg-black/70
+          text-white rounded-full w-7 h-7
+          flex items-center justify-center
+          hover:bg-red-600 transition"
+                  title="Eliminar imagen"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+          </div>
+
+
+          {/* 🔘 BOTÓN */}
           <button
             type="submit"
-            className="md:col-span-2 bg-white text-black py-2 rounded font-semibold hover:shadow-lg transition"
+            className="md:col-span-3 bg-white text-black py-3 rounded font-semibold hover:shadow-lg transition"
           >
             Agregar Producto
           </button>
