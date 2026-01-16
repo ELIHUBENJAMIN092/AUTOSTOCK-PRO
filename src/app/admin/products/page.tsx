@@ -75,7 +75,28 @@ export default function ProductsPage() {
       return;
     }
 
-    // ⚠️ AÚN NO enviamos imagen (eso es PASO 3)
+    let imageUrl = "";
+
+    // 📸 SUBIR IMAGEN A CLOUDINARY
+    if (image) {
+      const formData = new FormData();
+      formData.append("file", image);
+
+      const uploadRes = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!uploadRes.ok) {
+        setError("Error subiendo imagen");
+        return;
+      }
+
+      const uploadData = await uploadRes.json();
+      imageUrl = uploadData.url;
+    }
+
+    // 📦 GUARDAR PRODUCTO EN DB
     const res = await fetch("/api/products", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -86,6 +107,7 @@ export default function ProductsPage() {
         price: Number(price),
         stock: Number(stock),
         category,
+        image: imageUrl,
       }),
     });
 
@@ -105,6 +127,7 @@ export default function ProductsPage() {
 
     fetchProducts();
   };
+
 
   // ================= EDITAR PRODUCTO =================
   const saveEdit = async () => {
