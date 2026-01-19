@@ -1,4 +1,4 @@
-import mongoose, { Schema, models } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 const ProductSchema = new Schema(
   {
@@ -8,6 +8,7 @@ const ProductSchema = new Schema(
       unique: true,
       uppercase: true,
       trim: true,
+      index: true, // ✅ mejora búsquedas por número de parte
     },
 
     name: {
@@ -19,12 +20,14 @@ const ProductSchema = new Schema(
     description: {
       type: String,
       default: "",
+      trim: true,
     },
 
     category: {
       type: Schema.Types.ObjectId,
       ref: "Category",
       required: true,
+      index: true, // ✅ mejora filtros por categoría
     },
 
     image: {
@@ -53,12 +56,19 @@ const ProductSchema = new Schema(
     isActive: {
       type: Boolean,
       default: true,
+      index: true,
     },
   },
   {
     timestamps: true,
+    versionKey: false, // ✅ evita __v (mejor para APIs)
   }
 );
 
-export default models.Product ||
-  mongoose.model("Product", ProductSchema);
+/**
+ * 🔒 Protección contra recompilación en Next.js (MUY IMPORTANTE)
+ */
+const Product =
+  mongoose.models.Product || mongoose.model("Product", ProductSchema);
+
+export default Product;

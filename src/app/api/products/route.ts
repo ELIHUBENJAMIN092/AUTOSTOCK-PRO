@@ -13,17 +13,24 @@ export async function GET() {
     await connectDB();
 
     const products = await Product.find()
-      .populate("category", "name isActive")
+      .populate({
+        path: "category",
+        select: "name isActive",
+        strictPopulate: false,
+      })
+      .lean()
       .sort({ createdAt: -1 });
 
     return NextResponse.json(products);
-  } catch {
+  } catch (error) {
+    console.error("GET /products error:", error);
     return NextResponse.json(
       { error: "Error obteniendo productos" },
       { status: 500 }
     );
   }
 }
+
 
 /**
  * POST → crear producto (code MANUAL)
