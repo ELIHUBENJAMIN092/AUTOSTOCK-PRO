@@ -33,7 +33,7 @@ export default function LoginPage() {
         className="bg-neutral-900 p-8 rounded-xl w-full max-w-sm border border-neutral-800"
       >
         <h1 className="text-2xl font-bold text-white mb-6 text-center">
-          Acceso Administrativo
+          Acceso Admin
         </h1>
 
         {error && (
