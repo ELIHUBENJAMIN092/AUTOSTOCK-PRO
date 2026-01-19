@@ -15,8 +15,8 @@ async function createAdmin() {
   await mongoose.connect(process.env.MONGODB_URI);
   console.log("✅ Conectado a MongoDB");
 
-  const email = "admin@autostock.com";
-  const password = "admin123";
+  const email = "soporte@compelecuador.com";
+  const password = "Compel8794";
   const hashedPassword = await bcrypt.hash(password, 10);
 
   const exists = await User.findOne({ email });
