@@ -200,7 +200,7 @@ export default function ProductsPage() {
 
             <input
               type="text"
-              placeholder="Descripción"
+              placeholder="Ubicación"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               className="px-4 py-2 bg-neutral-800 rounded text-white md:col-span-2"
