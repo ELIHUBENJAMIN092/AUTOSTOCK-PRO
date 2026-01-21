@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ImageIcon } from "lucide-react";
-
+import { Plus, Minus, Pencil } from "lucide-react";
 
 type Category = {
   _id: string;
@@ -17,36 +16,24 @@ type Product = {
   description?: string;
   price?: number;
   stock?: number;
-  minStock?: number;
-  isActive?: boolean;
   category?: Category;
-  image?: string;
 };
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
 
-  // 🔹 Crear
-  const [code, setCode] = useState("");
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [price, setPrice] = useState("");
-  const [stock, setStock] = useState("0");
-  const [category, setCategory] = useState("");
-  const [error, setError] = useState("");
-
-  // 📸 Imagen (PASO 2)
-  const [image, setImage] = useState<File | null>(null);
-
-  // 🔹 Editar (MODAL)
+  // Modal editar
   const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [saving, setSaving] = useState(false);
 
-  // 🔍 Filtros
-  const [search, setSearch] = useState("");
-  const [filterCategory, setFilterCategory] = useState("");
+  useEffect(() => {
+    Promise.all([fetchProducts(), fetchCategories()]).finally(() =>
+      setLoading(false)
+    );
+  }, []);
 
   const fetchProducts = async () => {
     const res = await fetch("/api/products");
@@ -59,82 +46,30 @@ export default function ProductsPage() {
     setCategories(data.filter((c: Category) => c.isActive));
   };
 
-  useEffect(() => {
-    Promise.all([fetchProducts(), fetchCategories()]).finally(() =>
-      setLoading(false)
+  // ================= STOCK =================
+  const updateStock = async (id: string, delta: number) => {
+    const product = products.find((p) => p._id === id);
+    if (!product) return;
+
+    const newStock = Math.max(0, (product.stock ?? 0) + delta);
+
+    setProducts((prev) =>
+      prev.map((p) => (p._id === id ? { ...p, stock: newStock } : p))
     );
-  }, []);
 
-  // ================= CREAR PRODUCTO =================
-  const createProduct = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-
-    if (!code || !name || !price || !category) {
-      setError("Código, nombre, precio y categoría son obligatorios");
-      return;
-    }
-
-    let imageUrl = "";
-
-    // 📸 SUBIR IMAGEN A CLOUDINARY
-    if (image) {
-      const formData = new FormData();
-      formData.append("file", image);
-
-      const uploadRes = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!uploadRes.ok) {
-        setError("Error subiendo imagen");
-        return;
-      }
-
-      const uploadData = await uploadRes.json();
-      imageUrl = uploadData.url;
-    }
-
-    // 📦 GUARDAR PRODUCTO EN DB
-    const res = await fetch("/api/products", {
-      method: "POST",
+    await fetch(`/api/products/${id}`, {
+      method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        code,
-        name,
-        description,
-        price: Number(price),
-        stock: Number(stock),
-        category,
-        image: imageUrl,
-      }),
+      body: JSON.stringify({ stock: newStock }),
     });
-
-    if (!res.ok) {
-      const data = await res.json();
-      setError(data.error || "Error creando producto");
-      return;
-    }
-
-    setCode("");
-    setName("");
-    setDescription("");
-    setPrice("");
-    setStock("0");
-    setCategory("");
-    setImage(null);
-
-    fetchProducts();
   };
 
-
-  // ================= EDITAR PRODUCTO =================
+  // ================= GUARDAR EDICIÓN =================
   const saveEdit = async () => {
     if (!editProduct) return;
     setSaving(true);
 
-    const res = await fetch(`/api/products/${editProduct._id}`, {
+    await fetch(`/api/products/${editProduct._id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -147,240 +82,134 @@ export default function ProductsPage() {
       }),
     });
 
-    if (!res.ok) {
-      console.error("Error al guardar producto");
-    }
-
     setSaving(false);
     setEditProduct(null);
     fetchProducts();
   };
 
-  // ================= FILTRO =================
-  const filteredProducts = products.filter((p) => {
-    const matchSearch =
+  const filteredProducts = products.filter(
+    (p) =>
       p.name.toLowerCase().includes(search.toLowerCase()) ||
-      (p.code ?? "").toLowerCase().includes(search.toLowerCase());
-
-    const matchCategory =
-      !filterCategory || p.category?._id === filterCategory;
-
-    return matchSearch && matchCategory;
-  });
+      (p.code ?? "").toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div className="p-6 text-white">
       <h1 className="text-2xl font-bold mb-6">Productos</h1>
 
-      {/* ================= FORMULARIO CREAR PRODUCTO ================= */}
-      <div className="mb-8 p-6 bg-neutral-900 rounded-xl border border-neutral-800">
-        <h2 className="text-lg font-semibold mb-4">Agregar Nuevo Producto</h2>
-        {error && <p className="text-red-500 mb-3">{error}</p>}
+      {/* BUSCADOR */}
+      <input
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        placeholder="Buscar producto..."
+        className="w-full mb-6 px-4 py-3 bg-neutral-800 border border-neutral-700 rounded-lg"
+      />
 
-        <form
-          onSubmit={createProduct}
-          className="grid grid-cols-1 md:grid-cols-3 gap-6"
-        >
-          {/* 🧾 DATOS PRODUCTO */}
-          <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input
-              type="text"
-              placeholder="Código"
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              className="px-4 py-2 bg-neutral-800 rounded text-white"
-            />
-            <input
-              type="text"
-              placeholder="Nombre"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="px-4 py-2 bg-neutral-800 rounded text-white"
-            />
-
-            <input
-              type="text"
-              placeholder="Ubicación"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="px-4 py-2 bg-neutral-800 rounded text-white md:col-span-2"
-            />
-
-            <input
-              type="number"
-              placeholder="Precio"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              className="px-4 py-2 bg-neutral-800 rounded text-white"
-            />
-            <input
-              type="number"
-              placeholder="Stock"
-              value={stock}
-              onChange={(e) => setStock(e.target.value)}
-              className="px-4 py-2 bg-neutral-800 rounded text-white"
-            />
-
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              className="px-4 py-2 bg-neutral-800 rounded text-white md:col-span-2"
-            >
-              <option value="">Selecciona categoría</option>
-              {categories.map((c) => (
-                <option key={c._id} value={c._id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* 🖼️ IMAGEN */}
-          <div className="flex justify-center">
-            <input
-              type="file"
-              id="imageUpload"
-              accept="image/*"
-              hidden
-              onChange={(e) => {
-                if (e.target.files && e.target.files[0]) {
-                  setImage(e.target.files[0]);
-                }
-              }}
-            />
-
-            {!image ? (
-              /* ⬆️ CUADRO SUBIR */
-              <label
-                htmlFor="imageUpload"
-                className="w-44 h-44 flex flex-col items-center justify-center
-        border-2 border-dashed border-neutral-600
-        rounded-xl cursor-pointer
-        hover:border-white hover:bg-neutral-800
-        transition text-neutral-400 hover:text-white"
-              >
-                <ImageIcon size={40} />
-                <span className="text-sm mt-2">Subir imagen</span>
-              </label>
-            ) : (
-              /* 🖼️ PREVIEW REEMPLAZA EL CUADRO */
-              <div className="relative w-44 h-44">
-                <img
-                  src={URL.createObjectURL(image)}
-                  alt="Preview"
-                  className="w-full h-full object-cover rounded-xl border border-neutral-700"
-                />
-
-                {/* ❌ BOTÓN BORRAR */}
-                <button
-                  type="button"
-                  onClick={() => setImage(null)}
-                  className="absolute top-2 right-2 bg-black/70
-          text-white rounded-full w-7 h-7
-          flex items-center justify-center
-          hover:bg-red-600 transition"
-                  title="Eliminar imagen"
-                >
-                  ✕
-                </button>
-              </div>
-            )}
-          </div>
-
-
-          {/* 🔘 BOTÓN */}
-          <button
-            type="submit"
-            className="md:col-span-3 bg-white text-black py-3 rounded font-semibold hover:shadow-lg transition"
-          >
-            Agregar Producto
-          </button>
-        </form>
-      </div>
-
-      {/* ================= BUSCADOR ================= */}
-      <div className="flex flex-col md:flex-row gap-4 mb-6">
-        <input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Buscar..."
-          className="flex-1 px-4 py-2 bg-neutral-800 rounded"
-        />
-        <select
-          value={filterCategory}
-          onChange={(e) => setFilterCategory(e.target.value)}
-          className="px-4 py-2 bg-neutral-800 rounded"
-        >
-          <option value="">Todas las categorías</option>
-          {categories.map((cat) => (
-            <option key={cat._id} value={cat._id}>
-              {cat.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* ================= LISTADO ================= */}
       {loading ? (
         <p>Cargando...</p>
       ) : (
         <>
-          {/* 📱 MOBILE */}
+          {/* ================= MOBILE ================= */}
           <div className="space-y-4 md:hidden">
             {filteredProducts.map((p) => (
               <div
                 key={p._id}
-                className="bg-neutral-900 border border-neutral-800 rounded p-4"
+                className="bg-neutral-900 border border-neutral-800 rounded-xl p-4"
               >
                 <h3 className="font-semibold">{p.name}</h3>
-                <p className="text-sm text-neutral-400">{p.category?.name}</p>
+                <p className="text-xs text-neutral-400 mt-1">
+                  {p.code} · {p.category?.name}
+                </p>
 
-                <div className="flex justify-between text-sm mt-2">
-                  <span>${p.price?.toFixed(2)}</span>
-                  <span>Stock: {p.stock ?? 0}</span>
+                <p className="mt-2">${p.price?.toFixed(2)}</p>
+
+                <div className="mt-4 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => updateStock(p._id, -1)}
+                      disabled={(p.stock ?? 0) === 0}
+                      className="w-10 h-10 bg-neutral-800 rounded-lg
+                                 flex items-center justify-center
+                                 disabled:opacity-40"
+                    >
+                      <Minus />
+                    </button>
+
+                    <span className="text-lg font-semibold">
+                      {p.stock ?? 0}
+                    </span>
+
+                    <button
+                      onClick={() => updateStock(p._id, 1)}
+                      className="w-10 h-10 bg-neutral-800 rounded-lg
+                                 flex items-center justify-center"
+                    >
+                      <Plus />
+                    </button>
+                  </div>
+
+                  <button
+                    onClick={() => setEditProduct(p)}
+                    className="w-10 h-10 bg-neutral-800 rounded-lg
+                               flex items-center justify-center"
+                  >
+                    <Pencil />
+                  </button>
                 </div>
-
-                <button
-                  onClick={() => setEditProduct(p)}
-                  className="mt-3 w-full bg-neutral-800 hover:bg-neutral-700 text-white py-2 rounded text-sm transition"
-                >
-                  Editar
-                </button>
               </div>
             ))}
           </div>
 
-          {/* 🖥️ DESKTOP */}
+          {/* ================= DESKTOP ================= */}
           <div className="hidden md:block overflow-x-auto">
             <table className="w-full border border-neutral-800 rounded">
-              <thead className="bg-neutral-900 text-sm">
+              <thead className="bg-neutral-900">
                 <tr>
                   <th className="p-3 text-left">Código</th>
                   <th className="p-3 text-left">Nombre</th>
                   <th className="p-3 text-left">Categoría</th>
                   <th className="p-3 text-left">Precio</th>
                   <th className="p-3 text-left">Stock</th>
-                  <th className="p-3"></th>
+                  <th className="p-3">Editar</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredProducts.map((p) => (
                   <tr
                     key={p._id}
-                    className="border-t border-neutral-800 hover:bg-neutral-900 transition"
+                    className="border-t border-neutral-800 hover:bg-neutral-900"
                   >
                     <td className="p-3">{p.code}</td>
                     <td className="p-3">{p.name}</td>
                     <td className="p-3">{p.category?.name}</td>
                     <td className="p-3">${p.price?.toFixed(2)}</td>
-                    <td className="p-3">{p.stock}</td>
+                    <td className="p-3 font-semibold">{p.stock}</td>
                     <td className="p-3">
-                      <button
-                        onClick={() => setEditProduct(p)}
-                        className="bg-neutral-800 hover:bg-neutral-700 text-white px-3 py-1 rounded text-sm transition"
-                      >
-                        Editar
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => updateStock(p._id, -1)}
+                          className="w-8 h-8 bg-neutral-800 rounded
+                                     flex items-center justify-center"
+                        >
+                          <Minus size={16} />
+                        </button>
+
+                        <button
+                          onClick={() => updateStock(p._id, 1)}
+                          className="w-8 h-8 bg-neutral-800 rounded
+                                     flex items-center justify-center"
+                        >
+                          <Plus size={16} />
+                        </button>
+
+                        <button
+                          onClick={() => setEditProduct(p)}
+                          className="w-8 h-8 bg-neutral-800 rounded
+                                     flex items-center justify-center"
+                        >
+                          <Pencil size={16} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -392,16 +221,16 @@ export default function ProductsPage() {
 
       {/* ================= MODAL EDITAR ================= */}
       {editProduct && (
-        <div className="fixed inset-0 bg-black/60 flex items-end md:items-center justify-center z-50">
-          <div className="bg-neutral-900 w-full md:max-w-lg p-6 rounded-t-xl md:rounded-xl space-y-4">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="bg-neutral-900 w-full max-w-lg p-6 rounded-xl space-y-4">
             <h2 className="text-lg font-semibold">Editar producto</h2>
 
             <input
-              value={editProduct.code}
+              value={editProduct.code ?? ""}
               onChange={(e) =>
                 setEditProduct({ ...editProduct, code: e.target.value })
               }
-              className="w-full px-4 py-2 bg-neutral-800 rounded text-white"
+              className="w-full px-4 py-2 bg-neutral-800 rounded"
               placeholder="Código"
             />
 
@@ -410,42 +239,45 @@ export default function ProductsPage() {
               onChange={(e) =>
                 setEditProduct({ ...editProduct, name: e.target.value })
               }
-              className="w-full px-4 py-2 bg-neutral-800 rounded text-white"
+              className="w-full px-4 py-2 bg-neutral-800 rounded"
               placeholder="Nombre"
             />
 
             <input
               value={editProduct.description ?? ""}
               onChange={(e) =>
-                setEditProduct({ ...editProduct, description: e.target.value })
+                setEditProduct({
+                  ...editProduct,
+                  description: e.target.value,
+                })
               }
-              className="w-full px-4 py-2 bg-neutral-800 rounded text-white"
-              placeholder="Descripción"
+              className="w-full px-4 py-2 bg-neutral-800 rounded"
+              placeholder="Ubicación"
             />
 
             <input
               type="number"
-              value={editProduct.price ?? ""}
+              value={editProduct.price ?? 0}
               onChange={(e) =>
                 setEditProduct({
                   ...editProduct,
                   price: Number(e.target.value),
                 })
               }
-              className="w-full px-4 py-2 bg-neutral-800 rounded text-white"
+              className="w-full px-4 py-2 bg-neutral-800 rounded"
               placeholder="Precio"
             />
 
             <input
               type="number"
-              value={editProduct.stock ?? ""}
+              value={editProduct.stock ?? 0}
               onChange={(e) =>
                 setEditProduct({
                   ...editProduct,
                   stock: Number(e.target.value),
                 })
               }
-              className="w-full px-4 py-2 bg-neutral-800 rounded text-white"
+              className="w-full px-4 py-2 bg-neutral-800 rounded"
               placeholder="Stock"
             />
 
@@ -454,10 +286,12 @@ export default function ProductsPage() {
               onChange={(e) =>
                 setEditProduct({
                   ...editProduct,
-                  category: categories.find((c) => c._id === e.target.value),
+                  category: categories.find(
+                    (c) => c._id === e.target.value
+                  ),
                 })
               }
-              className="w-full px-4 py-2 bg-neutral-800 rounded text-white"
+              className="w-full px-4 py-2 bg-neutral-800 rounded"
             >
               <option value="">Selecciona categoría</option>
               {categories.map((c) => (
@@ -467,17 +301,17 @@ export default function ProductsPage() {
               ))}
             </select>
 
-            <div className="flex gap-3">
+            <div className="flex gap-3 pt-2">
               <button
                 onClick={() => setEditProduct(null)}
-                className="flex-1 bg-neutral-700 py-2 rounded text-white hover:bg-neutral-600 transition"
+                className="flex-1 bg-neutral-700 py-2 rounded"
               >
                 Cancelar
               </button>
               <button
                 onClick={saveEdit}
                 disabled={saving}
-                className="flex-1 bg-white text-black py-2 rounded hover:shadow-lg transition"
+                className="flex-1 bg-white text-black py-2 rounded"
               >
                 {saving ? "Guardando..." : "Guardar"}
               </button>
