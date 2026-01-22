@@ -3,9 +3,6 @@ import { connectDB } from "@/lib/db";
 import Product from "@/models/Product";
 import Category from "@/models/Category";
 
-/**
- * PUT → actualizar producto
- */
 export async function PUT(
   req: Request,
   context: { params: Promise<{ id: string }> }
@@ -13,9 +10,31 @@ export async function PUT(
   try {
     await connectDB();
 
-    // ✅ OBLIGATORIO en Next 15+
     const { id } = await context.params;
+    const body = await req.json();
 
+    /* ================= STOCK RÁPIDO ================= */
+    if (
+      Object.keys(body).length === 1 &&
+      typeof body.stock === "number"
+    ) {
+      const updated = await Product.findByIdAndUpdate(
+        id,
+        { stock: body.stock },
+        { new: true }
+      ).populate("category", "name isActive");
+
+      if (!updated) {
+        return NextResponse.json(
+          { error: "Producto no encontrado" },
+          { status: 404 }
+        );
+      }
+
+      return NextResponse.json(updated);
+    }
+
+    /* ================= EDICIÓN COMPLETA ================= */
     const {
       code,
       name,
@@ -25,9 +44,9 @@ export async function PUT(
       minStock,
       category,
       isActive,
-    } = await req.json();
+    } = body;
 
-    // 🔴 Validaciones
+    // 🔴 Validaciones completas
     if (!code || !name || price == null || !category) {
       return NextResponse.json(
         { error: "Campos obligatorios faltantes" },
@@ -61,7 +80,6 @@ export async function PUT(
       );
     }
 
-    // ✅ actualizar producto
     const updatedProduct = await Product.findByIdAndUpdate(
       id,
       {

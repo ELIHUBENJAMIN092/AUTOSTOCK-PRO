@@ -1,29 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Minus, Pencil, ImageIcon } from "lucide-react";
-import SearchBar from '@/app/components/home/SearchBar'
+import { Plus, Minus, Pencil, Save } from "lucide-react";
+import SearchBar from "@/app/components/home/SearchBar";
 import CreateProductForm from "./components/CreateProductForm";
+import EditProductModal from "./components/EditProductModal";
+import type { Product, Category } from "./types";
 
-/* ================= TIPOS ================= */
-type Category = {
-  _id: string;
-  name: string;
-  isActive: boolean;
-};
-
-type Product = {
-  _id: string;
-  code?: string;
-  name: string;
-  description?: string;
-  price?: number;
-  stock?: number;
-  category?: Category;
-  image?: string;
-};
-
-/* ================= COMPONENTE ================= */
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -119,22 +102,26 @@ export default function ProductsPage() {
     fetchProducts();
   };
 
-  /* ================= STOCK RÁPIDO ================= */
-  const updateStock = async (id: string, delta: number) => {
-    const product = products.find((p) => p._id === id);
-    if (!product) return;
-
-    const newStock = Math.max(0, (product.stock ?? 0) + delta);
-
+  /* ================= STOCK (UI) ================= */
+  const updateStock = (id: string, delta: number) => {
     setProducts((prev) =>
-      prev.map((p) => (p._id === id ? { ...p, stock: newStock } : p))
+      prev.map((p) =>
+        p._id === id
+          ? { ...p, stock: Math.max(0, (p.stock ?? 0) + delta) }
+          : p
+      )
     );
+  };
 
-    await fetch(`/api/products/${id}`, {
+  /* ================= GUARDAR STOCK ================= */
+  const saveStock = async (product: Product) => {
+    await fetch(`/api/products/${product._id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ stock: newStock }),
+      body: JSON.stringify({ stock: product.stock }),
     });
+
+    fetchProducts();
   };
 
   /* ================= GUARDAR EDICIÓN ================= */
@@ -172,39 +159,36 @@ export default function ProductsPage() {
       <h1 className="text-2xl font-bold">Productos</h1>
 
       <CreateProductForm
-  categories={categories}
-  onSubmit={createProduct}
-  code={code}
-  setCode={setCode}
-  name={name}
-  setName={setName}
-  description={description}
-  setDescription={setDescription}
-  price={price}
-  setPrice={setPrice}
-  stock={stock}
-  setStock={setStock}
-  category={category}
-  setCategory={setCategory}
-  image={image}
-  setImage={setImage}
-  error={error}
-/>
+        categories={categories}
+        onSubmit={createProduct}
+        code={code}
+        setCode={setCode}
+        name={name}
+        setName={setName}
+        description={description}
+        setDescription={setDescription}
+        price={price}
+        setPrice={setPrice}
+        stock={stock}
+        setStock={setStock}
+        category={category}
+        setCategory={setCategory}
+        image={image}
+        setImage={setImage}
+        error={error}
+      />
 
-
-      {/* BUSCADOR REUTILIZABLE */}
       <SearchBar
         value={search}
         onChange={setSearch}
         placeholder="Buscar por nombre o número de parte..."
       />
 
-      {/* ================= LISTADO ================= */}
       {loading ? (
         <p>Cargando...</p>
       ) : (
         <>
-          {/* MOBILE */}
+          {/* ===== MOBILE ===== */}
           <div className="md:hidden space-y-4">
             {filteredProducts.map((p) => (
               <div
@@ -235,18 +219,27 @@ export default function ProductsPage() {
                     </button>
                   </div>
 
-                  <button
-                    onClick={() => setEditProduct(p)}
-                    className="w-10 h-10 bg-neutral-800 rounded-lg flex items-center justify-center"
-                  >
-                    <Pencil />
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => saveStock(p)}
+                      className="w-10 h-10 bg-green-600/90 rounded-lg flex items-center justify-center"
+                    >
+                      <Save />
+                    </button>
+
+                    <button
+                      onClick={() => setEditProduct(p)}
+                      className="w-10 h-10 bg-neutral-800 rounded-lg flex items-center justify-center"
+                    >
+                      <Pencil />
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* DESKTOP */}
+          {/* ===== DESKTOP ===== */}
           <div className="hidden md:block overflow-x-auto">
             <table className="w-full border border-neutral-800 rounded">
               <thead className="bg-neutral-900">
@@ -255,7 +248,7 @@ export default function ProductsPage() {
                   <th className="p-3 text-left">Nombre</th>
                   <th className="p-3 text-left">Categoría</th>
                   <th className="p-3 text-left">Stock</th>
-                  <th className="p-3">Editar</th>
+                  <th className="p-3 text-center">Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -273,12 +266,21 @@ export default function ProductsPage() {
                         >
                           <Minus size={16} />
                         </button>
+
                         <button
                           onClick={() => updateStock(p._id, 1)}
                           className="w-8 h-8 bg-neutral-800 rounded flex items-center justify-center"
                         >
                           <Plus size={16} />
                         </button>
+
+                        <button
+                          onClick={() => saveStock(p)}
+                          className="w-8 h-8 bg-green-600/90 rounded flex items-center justify-center"
+                        >
+                          <Save size={16} />
+                        </button>
+
                         <button
                           onClick={() => setEditProduct(p)}
                           className="w-8 h-8 bg-neutral-800 rounded flex items-center justify-center"
@@ -295,99 +297,15 @@ export default function ProductsPage() {
         </>
       )}
 
-      {/* ================= MODAL EDITAR ================= */}
       {editProduct && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div className="bg-neutral-900 p-6 rounded-xl w-full max-w-lg space-y-4">
-            <h2 className="text-lg font-semibold">Editar producto</h2>
-
-            <input
-              value={editProduct.code ?? ""}
-              onChange={(e) =>
-                setEditProduct({ ...editProduct, code: e.target.value })
-              }
-              className="bg-neutral-800 px-4 py-2 rounded w-full"
-            />
-
-            <input
-              value={editProduct.name}
-              onChange={(e) =>
-                setEditProduct({ ...editProduct, name: e.target.value })
-              }
-              className="bg-neutral-800 px-4 py-2 rounded w-full"
-            />
-
-            <input
-              value={editProduct.description ?? ""}
-              onChange={(e) =>
-                setEditProduct({
-                  ...editProduct,
-                  description: e.target.value,
-                })
-              }
-              className="bg-neutral-800 px-4 py-2 rounded w-full"
-            />
-
-            <input
-              type="number"
-              value={editProduct.price ?? 0}
-              onChange={(e) =>
-                setEditProduct({
-                  ...editProduct,
-                  price: Number(e.target.value),
-                })
-              }
-              className="bg-neutral-800 px-4 py-2 rounded w-full"
-            />
-
-            <input
-              type="number"
-              value={editProduct.stock ?? 0}
-              onChange={(e) =>
-                setEditProduct({
-                  ...editProduct,
-                  stock: Number(e.target.value),
-                })
-              }
-              className="bg-neutral-800 px-4 py-2 rounded w-full"
-            />
-
-            <select
-              value={editProduct.category?._id ?? ""}
-              onChange={(e) =>
-                setEditProduct({
-                  ...editProduct,
-                  category: categories.find(
-                    (c) => c._id === e.target.value
-                  ),
-                })
-              }
-              className="bg-neutral-800 px-4 py-2 rounded w-full"
-            >
-              {categories.map((c) => (
-                <option key={c._id} value={c._id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-
-            <div className="flex gap-3">
-              <button
-                onClick={() => setEditProduct(null)}
-                className="flex-1 bg-neutral-700 py-2 rounded"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={saveEdit}
-                disabled={saving}
-                className="flex-1 bg-white text-black py-2 rounded"
-              >
-                {saving ? "Guardando..." : "Guardar"}
-              </button>
-            </div>
-          </div>
-        </div>
+        <EditProductModal
+          product={editProduct}
+          categories={categories}
+          saving={saving}
+          onChange={setEditProduct}
+          onClose={() => setEditProduct(null)}
+          onSave={saveEdit}
+        />
       )}
     </div>
   );
