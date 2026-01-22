@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from 'react'
 import ProductCard from './ProductCard'
+import SearchBar from './SearchBar'
+import CategoryFilter from './CategoryFilter'
+
 
 export default function Inventory() {
   const [products, setProducts] = useState<any[]>([])
@@ -47,93 +50,18 @@ export default function Inventory() {
           Inventario de Repuestos
         </h2>
 
-        {/* BUSCADOR */}
-        <div className="max-w-3xl mx-auto mb-6 relative">
-          {/* Icono de búsqueda */}
-          <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/70">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="w-5 h-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 104.5 4.5a7.5 7.5 0 0012.15 12.15z"
-              />
-            </svg>
-          </span>
+        {/* BUSCADOR REUTILIZABLE */}
+        <SearchBar
+          value={search}
+          onChange={setSearch}
+          placeholder="Buscar por nombre o número de parte..."
+        />
 
-          {/* Input */}
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar por nombre o número de parte..."
-            className="w-full pl-12 pr-10 py-3 rounded-lg
-      bg-neutral-800 border border-neutral-700 text-white
-      focus:outline-none focus:border-neutral-500"
-          />
-
-          {/* Botón de borrar */}
-          {search && (
-            <button
-              onClick={() => setSearch('')}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/70 hover:text-white"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="w-5 h-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-          )}
-        </div>
-
-        {/* FILTRO POR CATEGORÍAS (CHIPS) */}
-        {categories.length > 0 && (
-          <div className="max-w-6xl mx-auto mb-12">
-            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-
-              {/* TODAS */}
-              <button
-                onClick={() => setCategory('all')}
-                className={`px-5 py-2 rounded-full text-sm font-medium whitespace-nowrap transition
-                  ${category === 'all'
-                    ? 'bg-white text-black'
-                    : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
-                  }`}
-              >
-                Todas
-              </button>
-
-              {categories.map(cat => (
-                <button
-                  key={cat}
-                  onClick={() => setCategory(cat)}
-                  className={`px-5 py-2 rounded-full text-sm font-medium whitespace-nowrap transition
-                    ${category === cat
-                      ? 'bg-white text-black'
-                      : 'bg-neutral-800 text-neutral-300 hover:bg-neutral-700'
-                    }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
+        <CategoryFilter
+          categories={categories}
+          value={category}
+          onChange={setCategory}
+        />
 
         {/* PRODUCTOS */}
         {loading ? (
