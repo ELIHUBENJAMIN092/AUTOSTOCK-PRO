@@ -73,7 +73,8 @@ export default function ProductForm({ categories, onCreated }: Props) {
   };
 
   return (
-    <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-6">
+    <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-4 md:p-6 max-w-xl mx-auto">
+
       <h2 className="text-lg font-semibold mb-4">
         Agregar Nuevo Producto
       </h2>
@@ -82,8 +83,9 @@ export default function ProductForm({ categories, onCreated }: Props) {
 
       <form
         onSubmit={handleSubmit}
-        className="grid grid-cols-1 md:grid-cols-3 gap-6"
+        className="flex flex-col gap-6 md:grid md:grid-cols-3"
       >
+
         {/* DATOS */}
         <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
           <input

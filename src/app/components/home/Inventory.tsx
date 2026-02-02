@@ -5,12 +5,12 @@ import ProductCard from './ProductCard'
 import SearchBar from './SearchBar'
 import CategoryFilter from './CategoryFilter'
 
-
 export default function Inventory() {
   const [products, setProducts] = useState<any[]>([])
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('all')
   const [loading, setLoading] = useState(true)
+  const [showAll, setShowAll] = useState(false)
 
   useEffect(() => {
     fetch('/api/products')
@@ -38,6 +38,8 @@ export default function Inventory() {
     return matchSearch && matchCategory
   })
 
+  const visibleProducts = showAll ? filtered : filtered.slice(0, 20)
+
   return (
     <section
       id="inventario"
@@ -50,7 +52,6 @@ export default function Inventory() {
           Inventario de Repuestos
         </h2>
 
-        {/* BUSCADOR REUTILIZABLE */}
         <SearchBar
           value={search}
           onChange={setSearch}
@@ -63,19 +64,32 @@ export default function Inventory() {
           onChange={setCategory}
         />
 
-        {/* PRODUCTOS */}
         {loading ? (
           <p className="text-center text-neutral-400">Cargando...</p>
-        ) : filtered.length === 0 ? (
+        ) : visibleProducts.length === 0 ? (
           <p className="text-center text-neutral-400">
             No se encontraron productos
           </p>
         ) : (
-          <div className="grid grid-cols-2 lg:grid-cols-5 gap-6">
-            {filtered.map(p => (
-              <ProductCard key={p._id} product={p} />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-2 lg:grid-cols-5 gap-6">
+              {visibleProducts.map(p => (
+                <ProductCard key={p._id} product={p} />
+              ))}
+            </div>
+
+            {filtered.length > 20 && (
+              <div className="flex justify-center mt-10">
+                <button
+                  onClick={() => setShowAll(!showAll)}
+                  className="px-6 py-3 rounded-xl bg-white text-black font-semibold
+                             hover:opacity-90 transition"
+                >
+                  {showAll ? "Ver menos" : "Ver más productos"}
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </section>
