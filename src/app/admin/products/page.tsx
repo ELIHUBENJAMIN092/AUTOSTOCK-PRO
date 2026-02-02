@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Minus, Pencil, Save } from "lucide-react";
+import { Plus, Minus, Pencil, Save, Check } from "lucide-react";
 import SearchBar from "@/app/components/home/SearchBar";
 import CreateProductForm from "./components/CreateProductForm";
 import EditProductModal from "./components/EditProductModal";
@@ -11,6 +11,8 @@ export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [savedRow, setSavedRow] = useState<string | null>(null);
+
 
   /* 🔍 filtros */
   const [search, setSearch] = useState("");
@@ -115,14 +117,25 @@ export default function ProductsPage() {
 
   /* ================= GUARDAR STOCK ================= */
   const saveStock = async (product: Product) => {
-    await fetch(`/api/products/${product._id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ stock: product.stock }),
-    });
+    try {
+      await fetch(`/api/products/${product._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ stock: product.stock }),
+      });
 
-    fetchProducts();
+      setSavedRow(product._id);
+
+      setTimeout(() => {
+        setSavedRow(null);
+      }, 2000);
+
+      fetchProducts();
+    } catch (error) {
+      console.error("Error guardando stock", error);
+    }
   };
+
 
   /* ================= GUARDAR EDICIÓN ================= */
   const saveEdit = async () => {
@@ -222,9 +235,15 @@ export default function ProductsPage() {
                   <div className="flex gap-2">
                     <button
                       onClick={() => saveStock(p)}
-                      className="w-10 h-10 bg-green-600/90 rounded-lg flex items-center justify-center"
+                      className={`
+    w-10 h-10 rounded-lg flex items-center justify-center transition
+    ${savedRow === p._id
+                          ? "bg-green-600 text-white"
+                          : "bg-neutral-800 text-neutral-300 hover:bg-neutral-700"
+                        }
+  `}
                     >
-                      <Save />
+                      {savedRow === p._id ? <Check /> : <Save />}
                     </button>
 
                     <button
@@ -276,10 +295,21 @@ export default function ProductsPage() {
 
                         <button
                           onClick={() => saveStock(p)}
-                          className="w-8 h-8 bg-green-600/90 rounded flex items-center justify-center"
+                          className={`
+    w-8 h-8 rounded flex items-center justify-center transition
+    ${savedRow === p._id
+                              ? "bg-green-600 text-white"
+                              : "bg-neutral-800 text-neutral-300 hover:bg-neutral-700"
+                            }
+  `}
                         >
-                          <Save size={16} />
+                          {savedRow === p._id ? (
+                            <Check size={16} />
+                          ) : (
+                            <Save size={16} />
+                          )}
                         </button>
+
 
                         <button
                           onClick={() => setEditProduct(p)}
