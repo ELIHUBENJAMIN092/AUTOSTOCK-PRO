@@ -1,5 +1,5 @@
 import SearchBar from "@/app/components/home/SearchBar";
-import CreateProductForm from "./CreateProductForm";
+import ProductForm from "./ProductForm";
 import type { Category } from "../types";
 
 interface Props {
@@ -17,7 +17,7 @@ export default function ProductsToolbar({
 }: Props) {
   return (
     <div className="space-y-6">
-      <CreateProductForm
+      <ProductForm
         categories={categories}
         {...form}
       />
