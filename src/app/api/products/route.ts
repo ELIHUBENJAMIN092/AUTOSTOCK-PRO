@@ -4,7 +4,6 @@ import Product from "@/models/Product";
 import Category from "@/models/Category";
 import cloudinary from "@/lib/cloudinary";
 
-
 /**
  * GET → listar productos
  */
@@ -18,12 +17,12 @@ export async function GET() {
         select: "name isActive",
         strictPopulate: false,
       })
-      .lean()
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
 
     return NextResponse.json(products);
   } catch (error) {
-    console.error("GET /products error:", error);
+    console.error("GET /api/products error:", error);
     return NextResponse.json(
       { error: "Error obteniendo productos" },
       { status: 500 }
@@ -31,27 +30,26 @@ export async function GET() {
   }
 }
 
-
 /**
- * POST → crear producto (code MANUAL)
+ * POST → crear producto (FormData + imagen Cloudinary)
  */
 export async function POST(req: Request) {
   try {
     await connectDB();
 
-    const {
-      code,
-      name,
-      description = "",
-      price,
-      stock = 0,
-      minStock = 5,
-      category,
-      image = "",
-    } = await req.json();
+    const formData = await req.formData();
+
+    const code = formData.get("code")?.toString().toUpperCase();
+    const name = formData.get("name")?.toString();
+    const description = formData.get("description")?.toString() || "";
+    const price = Number(formData.get("price"));
+    const stock = Number(formData.get("stock") || 0);
+    const minStock = 5;
+    const category = formData.get("category")?.toString();
+    const imageFile = formData.get("image") as File | null;
 
     // 🔴 Validaciones obligatorias
-    if (!code || !name || price == null || !category) {
+    if (!code || !name || isNaN(price) || !category) {
       return NextResponse.json(
         { error: "Code, nombre, precio y categoría son obligatorios" },
         { status: 400 }
@@ -72,15 +70,32 @@ export async function POST(req: Request) {
     }
 
     // ❌ Evitar código duplicado
-    const codeExists = await Product.findOne({
-      code: code.toUpperCase(),
-    });
+    const codeExists = await Product.findOne({ code });
 
     if (codeExists) {
       return NextResponse.json(
         { error: "El número de parte ya existe" },
         { status: 400 }
       );
+    }
+
+    // 📸 Subir imagen a Cloudinary
+    let image = "";
+
+    if (imageFile) {
+      const buffer = Buffer.from(await imageFile.arrayBuffer());
+
+      const uploadResult: any = await new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream(
+          { folder: "products" },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        ).end(buffer);
+      });
+
+      image = uploadResult.secure_url; // ✅ URL REAL
     }
 
     // ✅ Crear producto
@@ -92,7 +107,7 @@ export async function POST(req: Request) {
       stock,
       minStock,
       category,
-      image,
+      image, // 👈 ahora es URL Cloudinary
       isActive: true,
     });
 

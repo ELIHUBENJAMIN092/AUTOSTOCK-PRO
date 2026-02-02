@@ -3,166 +3,189 @@
 import { useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { ImageIcon } from "lucide-react";
 
-interface Props {
-  categories: any[];
-  onSuccess?: () => void;
+interface Category {
+  _id: string;
+  name: string;
 }
 
-export default function ProductForm({ categories, onSuccess }: Props) {
+interface Props {
+  categories: Category[];
+  onCreated?: () => void;
+}
+
+export default function ProductForm({ categories, onCreated }: Props) {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | undefined>();
 
-  const [form, setForm] = useState({
-    code: "",
-    name: "",
-    description: "",
-    price: "",
-    stock: "",
-    minStock: "5",
-    category: "",
-  });
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
-  ) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  const [code, setCode] = useState("");
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [price, setPrice] = useState("");
+  const [stock, setStock] = useState("");
+  const [category, setCategory] = useState("");
+  const [image, setImage] = useState<File | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(undefined);
 
-    if (!form.code || !form.name || !form.price || !form.category) {
-      toast.error("Completa los campos obligatorios");
+    if (!code || !name || !price || !category) {
+      setError("Completa los campos obligatorios");
       return;
     }
 
     try {
       setLoading(true);
 
-      await axios.post("/api/products", {
-        code: form.code,
-        name: form.name,
-        description: form.description,
-        price: Number(form.price),
-        stock: Number(form.stock),
-        minStock: Number(form.minStock),
-        category: form.category,
-      });
+      const formData = new FormData();
+      formData.append("code", code);
+      formData.append("name", name);
+      formData.append("description", description);
+      formData.append("price", price);
+      formData.append("stock", stock);
+      formData.append("category", category);
+
+      if (image) {
+        formData.append("image", image);
+      }
+
+      await axios.post("/api/products", formData);
 
       toast.success("Producto creado correctamente");
 
-      setForm({
-        code: "",
-        name: "",
-        description: "",
-        price: "",
-        stock: "",
-        minStock: "5",
-        category: "",
-      });
+      // reset
+      setCode("");
+      setName("");
+      setDescription("");
+      setPrice("");
+      setStock("");
+      setCategory("");
+      setImage(null);
 
-      onSuccess?.();
-    } catch (error: any) {
-      toast.error(error.response?.data?.error || "Error creando producto");
+      onCreated?.();
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || "Error creando producto");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="bg-white p-6 rounded-xl shadow space-y-4 max-w-xl"
-    >
-      {/* Número de parte */}
-      <div>
-        <label className="block text-sm font-medium">Número de parte *</label>
-        <input
-          type="text"
-          name="code"
-          value={form.code}
-          onChange={handleChange}
-          placeholder="Ej: ZEB-ZC300-HEAD-300DPI"
-          className="w-full border rounded px-3 py-2"
-          required
-        />
-      </div>
+    <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-6">
+      <h2 className="text-lg font-semibold mb-4">
+        Agregar Nuevo Producto
+      </h2>
 
-      {/* Nombre */}
-      <div>
-        <label className="block text-sm font-medium">Nombre *</label>
-        <input
-          type="text"
-          name="name"
-          value={form.name}
-          onChange={handleChange}
-          className="w-full border rounded px-3 py-2"
-          required
-        />
-      </div>
+      {error && <p className="text-red-500 mb-3">{error}</p>}
 
-      {/* Descripción */}
-      <div>
-        <label className="block text-sm font-medium">Descripción</label>
-        <textarea
-          name="description"
-          value={form.description}
-          onChange={handleChange}
-          className="w-full border rounded px-3 py-2"
-        />
-      </div>
-
-      {/* Precio */}
-      <div>
-        <label className="block text-sm font-medium">Precio *</label>
-        <input
-          type="number"
-          step="0.01"
-          name="price"
-          value={form.price}
-          onChange={handleChange}
-          className="w-full border rounded px-3 py-2"
-          required
-        />
-      </div>
-
-      {/* Stock */}
-      <div>
-        <label className="block text-sm font-medium">Stock</label>
-        <input
-          type="number"
-          name="stock"
-          value={form.stock}
-          onChange={handleChange}
-          className="w-full border rounded px-3 py-2"
-        />
-      </div>
-
-      {/* Categoría */}
-      <div>
-        <label className="block text-sm font-medium">Categoría *</label>
-        <select
-          name="category"
-          value={form.category}
-          onChange={handleChange}
-          className="w-full border rounded px-3 py-2"
-          required
-        >
-          <option value="">Seleccione</option>
-          {categories.map((cat) => (
-            <option key={cat._id} value={cat._id}>
-              {cat.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <button
-        disabled={loading}
-        className="bg-black text-white px-4 py-2 rounded w-full"
+      <form
+        onSubmit={handleSubmit}
+        className="grid grid-cols-1 md:grid-cols-3 gap-6"
       >
-        {loading ? "Guardando..." : "Guardar producto"}
-      </button>
-    </form>
+        {/* DATOS */}
+        <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <input
+            placeholder="Código"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            className="bg-neutral-800 px-4 py-2 rounded"
+          />
+
+          <input
+            placeholder="Nombre"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="bg-neutral-800 px-4 py-2 rounded"
+          />
+
+          <input
+            placeholder="Ubicación"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="bg-neutral-800 px-4 py-2 rounded md:col-span-2"
+          />
+
+          <input
+            type="number"
+            placeholder="Precio"
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            className="bg-neutral-800 px-4 py-2 rounded"
+          />
+
+          <input
+            type="number"
+            placeholder="Stock"
+            value={stock}
+            onChange={(e) => setStock(e.target.value)}
+            className="bg-neutral-800 px-4 py-2 rounded"
+          />
+
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className="bg-neutral-800 px-4 py-2 rounded md:col-span-2"
+          >
+            <option value="">Selecciona categoría</option>
+            {categories.map((c) => (
+              <option key={c._id} value={c._id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* IMAGEN */}
+        <div className="flex justify-center">
+          <input
+            type="file"
+            id="imageUpload"
+            hidden
+            accept="image/*"
+            onChange={(e) =>
+              e.target.files && setImage(e.target.files[0])
+            }
+          />
+
+          {!image ? (
+            <label
+              htmlFor="imageUpload"
+              className="w-44 h-44 border-2 border-dashed
+                         border-neutral-600 rounded-xl
+                         flex flex-col items-center justify-center
+                         cursor-pointer hover:bg-neutral-800 transition"
+            >
+              <ImageIcon size={40} />
+              <span className="text-sm mt-2">Subir imagen</span>
+            </label>
+          ) : (
+            <div className="relative w-44 h-44">
+              <img
+                src={URL.createObjectURL(image)}
+                className="w-full h-full object-cover rounded-xl"
+              />
+              <button
+                type="button"
+                onClick={() => setImage(null)}
+                className="absolute top-2 right-2 bg-black/70
+                           w-7 h-7 rounded-full text-white"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="md:col-span-3 bg-white text-black py-3 rounded font-semibold"
+        >
+          {loading ? "Guardando..." : "Agregar Producto"}
+        </button>
+      </form>
+    </div>
   );
 }
