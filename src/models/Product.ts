@@ -8,7 +8,7 @@ const ProductSchema = new Schema(
       unique: true,
       uppercase: true,
       trim: true,
-      index: true, // ✅ mejora búsquedas por número de parte
+      index: true,
     },
 
     name: {
@@ -27,7 +27,7 @@ const ProductSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "Category",
       required: true,
-      index: true, // ✅ mejora filtros por categoría
+      index: true,
     },
 
     image: {
@@ -53,6 +53,13 @@ const ProductSchema = new Schema(
       min: 0,
     },
 
+    // 🔥 NUEVO CAMPO RFID
+    isRFID: {
+      type: Boolean,
+      default: false, // ⛔ OFF por defecto
+      index: true,
+    },
+
     isActive: {
       type: Boolean,
       default: true,
@@ -61,13 +68,10 @@ const ProductSchema = new Schema(
   },
   {
     timestamps: true,
-    versionKey: false, // ✅ evita __v (mejor para APIs)
+    versionKey: false,
   }
 );
 
-/**
- * 🔒 Protección contra recompilación en Next.js (MUY IMPORTANTE)
- */
 const Product =
   mongoose.models.Product || mongoose.model("Product", ProductSchema);
 

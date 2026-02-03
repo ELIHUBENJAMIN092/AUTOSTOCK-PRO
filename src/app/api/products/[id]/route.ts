@@ -13,7 +13,9 @@ export async function PUT(
     const { id } = await context.params;
     const body = await req.json();
 
-    /* ================= STOCK RÁPIDO ================= */
+    /* ================= STOCK RÁPIDO (manual) ================= */
+    // ⚠️ Solo permite actualizar stock directamente
+    // si NO viene edición completa
     if (
       Object.keys(body).length === 1 &&
       typeof body.stock === "number"
@@ -44,9 +46,10 @@ export async function PUT(
       minStock,
       category,
       isActive,
+      isRFID, // 🔥 RFID ON / OFF
     } = body;
 
-    // 🔴 Validaciones completas
+    // 🔴 Validaciones obligatorias
     if (!code || !name || price == null || !category) {
       return NextResponse.json(
         { error: "Campos obligatorios faltantes" },
@@ -54,7 +57,7 @@ export async function PUT(
       );
     }
 
-    // 🔒 validar categoría activa
+    // 🔒 Validar categoría activa
     const categoryExists = await Category.findOne({
       _id: category,
       isActive: true,
@@ -67,9 +70,9 @@ export async function PUT(
       );
     }
 
-    // ❌ evitar código duplicado
+    // ❌ Evitar código duplicado
     const codeExists = await Product.findOne({
-      code,
+      code: code.trim(),
       _id: { $ne: id },
     });
 
@@ -80,6 +83,7 @@ export async function PUT(
       );
     }
 
+    // ✅ Actualizar producto (incluye RFID)
     const updatedProduct = await Product.findByIdAndUpdate(
       id,
       {
@@ -91,6 +95,7 @@ export async function PUT(
         minStock,
         category,
         isActive,
+        isRFID, // 🔥 SE GUARDA EN MONGO
       },
       { new: true }
     ).populate("category", "name isActive");

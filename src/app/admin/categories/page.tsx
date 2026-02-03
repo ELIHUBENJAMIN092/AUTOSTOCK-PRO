@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import ScrollToTop from "@/app/components/ScrollToTop";
+
 
 type Category = {
   _id: string;
@@ -93,11 +95,10 @@ export default function CategoriesPage() {
           .map((cat) => (
             <li
               key={cat._id}
-              className={`p-4 rounded border flex justify-between items-center ${
-                cat.isActive
+              className={`p-4 rounded border flex justify-between items-center ${cat.isActive
                   ? "bg-neutral-900 border-neutral-800"
                   : "bg-neutral-800 border-red-500 opacity-60"
-              }`}
+                }`}
             >
               <div>
                 <p className="font-semibold">{cat.name}</p>
@@ -117,17 +118,18 @@ export default function CategoriesPage() {
 
               <button
                 onClick={() => toggleCategory(cat._id)}
-                className={`px-4 py-2 rounded text-sm font-medium ${
-                  cat.isActive
+                className={`px-4 py-2 rounded text-sm font-medium ${cat.isActive
                     ? "bg-red-500 text-white"
                     : "bg-green-500 text-black"
-                }`}
+                  }`}
               >
                 {cat.isActive ? "Desactivar" : "Activar"}
               </button>
             </li>
           ))}
       </ul>
+      {/* ⬆️ Scroll to top */}
+      <ScrollToTop />
     </div>
   );
 }

@@ -77,6 +77,14 @@ export default function AdminLayout({
           >
             Productos
           </Link>
+          <Link
+            href="/admin/rfid"
+            className="block hover:text-gray-300"
+            onClick={handleLinkClick}
+          >
+            RFID
+          </Link>
+
         </nav>
 
         {/* Botón Cerrar Sesión */}
