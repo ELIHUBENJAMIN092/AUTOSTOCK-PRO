@@ -3,25 +3,13 @@ import csv from "csv-parser";
 import { Readable } from "stream";
 import { connectDB } from "@/lib/db";
 import Product from "@/models/Product";
-
-type CSVRow = {
-  code?: string;
-  stock?: string;
-};
+import RFIDTag from "@/models/RFIDTag";
 
 export async function POST(req: Request) {
   const start = Date.now();
 
   try {
     await connectDB();
-
-    const contentType = req.headers.get("content-type") || "";
-    if (!contentType.includes("multipart/form-data")) {
-      return NextResponse.json(
-        { error: "Content-Type debe ser multipart/form-data" },
-        { status: 400 }
-      );
-    }
 
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
@@ -33,51 +21,80 @@ export async function POST(req: Request) {
       );
     }
 
+    // 📦 Leer archivo
     const buffer = Buffer.from(await file.arrayBuffer());
-    const stream = Readable.from(buffer.toString());
+    const lines = buffer.toString().split("\n");
 
-    const updates: { code: string; stock: number }[] = [];
-    const notFound: string[] = [];
-    let updated = 0;
+    // 🔎 Buscar fila donde empieza TAG
+    const headerIndex = lines.findIndex((line) =>
+      line.toUpperCase().includes("TAG")
+    );
 
-    // 📖 Leer CSV
+    if (headerIndex === -1) {
+      return NextResponse.json(
+        { error: "No se encontró la columna TAG" },
+        { status: 400 }
+      );
+    }
+
+    // 🧼 Limpiar encabezados basura
+    const cleanCSV = lines.slice(headerIndex).join("\n");
+    const stream = Readable.from(cleanCSV);
+
+    // EPC → cantidad
+    const epcCount: Record<string, number> = {};
+
+    // 📖 Leer CSV Zebra
     await new Promise<void>((resolve, reject) => {
       stream
         .pipe(csv())
-        .on("data", (row: CSVRow) => {
-          if (!row.code || !row.stock) return;
+        .on("data", (row: any) => {
+          const epc = row.TAG?.trim();
+          if (!epc) return;
 
-          const code = row.code.trim();
-          const stock = Number(row.stock);
-
-          if (!code || Number.isNaN(stock)) return;
-
-          updates.push({ code, stock });
+          // 👇 CLAVE: solo contar EPC únicos
+          epcCount[epc] = 1;
         })
         .on("end", resolve)
         .on("error", reject);
     });
 
-    // 🔁 Actualizar SOLO productos con RFID activo
-    for (const item of updates) {
-      const res = await Product.updateOne(
-        {
-          code: item.code,
-          isRFID: true, // 🔥 CLAVE
-        },
-        {
-          $set: {
-            stock: item.stock,
-            updatedAt: new Date(),
-          },
-        }
-      );
 
-      if (res.matchedCount === 0) {
-        notFound.push(item.code);
-      } else {
-        updated++;
+    // 🔗 Buscar EPCs registrados
+    const tags = await RFIDTag.find({
+      epc: { $in: Object.keys(epcCount) },
+    });
+
+    const productStock: Record<string, number> = {};
+    const notFound: string[] = [];
+
+    for (const tag of tags) {
+      const epc = tag.epc;
+      const productId = tag.product.toString();
+      const qty = epcCount[epc] || 0;
+
+      productStock[productId] =
+        (productStock[productId] || 0) + qty;
+    }
+
+    // ⚠ EPC no registrados
+    for (const epc of Object.keys(epcCount)) {
+      if (!tags.find((t) => t.epc === epc)) {
+        notFound.push(epc);
       }
+    }
+
+    // 📦 Actualizar stock de productos
+    let updated = 0;
+
+    for (const [productId, stock] of Object.entries(productStock)) {
+      await Product.findByIdAndUpdate(productId, {
+        $set: {
+          stock,
+          updatedAt: new Date(),
+        },
+      });
+      updated++;
     }
 
     return NextResponse.json({
@@ -88,7 +105,7 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error("RFID PROCESS ERROR:", error);
     return NextResponse.json(
-      { error: "Error procesando inventario RFID" },
+      { error: "Error procesando archivo RFID" },
       { status: 500 }
     );
   }

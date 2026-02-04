@@ -1,7 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ScrollToTop from "@/app/components/ScrollToTop";
+
+type Product = {
+  _id: string;
+  name: string;
+  code?: string;
+};
 
 type RFIDResult = {
   updated: number;
@@ -10,11 +16,55 @@ type RFIDResult = {
 };
 
 export default function RFIDPage() {
+  /* ---------------- EPC REGISTRO ---------------- */
+  const [epc, setEpc] = useState("");
+  const [productId, setProductId] = useState("");
+  const [products, setProducts] = useState<Product[]>([]);
+  const [saving, setSaving] = useState(false);
+  const [saveMsg, setSaveMsg] = useState<string | null>(null);
+
+  /* ---------------- RFID CSV ---------------- */
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<RFIDResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  /* ---------------- LOAD PRODUCTS ---------------- */
+  useEffect(() => {
+    fetch("/api/products?rfid=true")
+      .then((res) => res.json())
+      .then(setProducts)
+      .catch(() => setProducts([]));
+  }, []);
+
+  /* ---------------- SAVE EPC ---------------- */
+  const handleSaveEPC = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!epc || !productId) return;
+
+    setSaving(true);
+    setSaveMsg(null);
+
+    try {
+      const res = await fetch("/api/rfid/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ epc, productId }),
+      });
+
+      if (!res.ok) throw new Error("Error al registrar EPC");
+
+      setSaveMsg("✅ EPC registrado correctamente");
+      setEpc("");
+      setProductId("");
+    } catch (err: any) {
+      setSaveMsg(err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  /* ---------------- PROCESS CSV ---------------- */
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) return;
@@ -32,71 +82,101 @@ export default function RFIDPage() {
         body: formData,
       });
 
-      if (!res.ok) {
-        throw new Error("Error al procesar el archivo RFID");
-      }
+      if (!res.ok) throw new Error("Error al procesar el archivo RFID");
 
-      const data = await res.json();
-      setResult(data);
+      setResult(await res.json());
     } catch (err: any) {
-      setError(err.message || "Error desconocido");
+      setError(err.message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="p-6 text-white max-w-3xl">
-      <h1 className="text-2xl font-bold mb-6">RFID · Actualización de Inventario</h1>
+    <div className="p-6 text-white max-w-3xl space-y-10">
+      <h1 className="text-2xl font-bold">RFID · Gestión de Inventario</h1>
 
-      {/* 📤 SUBIR ARCHIVO */}
-      <form onSubmit={handleUpload} className="space-y-4 mb-8">
-        <input
-          type="file"
-          accept=".csv"
-          onChange={(e) => setFile(e.target.files?.[0] || null)}
-          className="block w-full text-sm file:bg-neutral-800 file:border-0 file:px-4 file:py-2 file:rounded file:text-white"
-          required
-        />
+      {/* ================= REGISTRO EPC ================= */}
+      <section className="p-4 bg-neutral-900 border border-neutral-800 rounded">
+        <h2 className="font-semibold mb-4">➕ Registrar EPC</h2>
 
-        <button
-          disabled={loading}
-          className="bg-white text-black px-6 py-2 rounded font-medium disabled:opacity-50"
-        >
-          {loading ? "Procesando..." : "Procesar archivo RFID"}
-        </button>
-      </form>
+        <form onSubmit={handleSaveEPC} className="space-y-3">
+          <input
+            value={epc}
+            onChange={(e) => setEpc(e.target.value)}
+            placeholder="EPC (ej: 300833B2DDD9014000000001)"
+            className="w-full p-2 bg-neutral-800 rounded"
+            required
+          />
 
-      {/* ❌ ERROR */}
-      {error && (
-        <div className="mb-6 p-4 bg-red-900/40 border border-red-500 rounded">
-          {error}
-        </div>
-      )}
+          <select
+            value={productId}
+            onChange={(e) => setProductId(e.target.value)}
+            className="w-full p-2 bg-neutral-800 rounded"
+            required
+          >
+            <option value="">Selecciona producto</option>
+            {products.map((p) => (
+              <option key={p._id} value={p._id}>
+                {p.name} {p.code && `(${p.code})`}
+              </option>
+            ))}
+          </select>
 
-      {/* ✅ RESULTADO */}
-      {result && (
-        <div className="space-y-4 p-4 bg-neutral-900 border border-neutral-800 rounded">
-          <h2 className="font-semibold text-lg">Resultado del proceso</h2>
+          <button
+            disabled={saving}
+            className="bg-white text-black px-4 py-2 rounded disabled:opacity-50"
+          >
+            {saving ? "Guardando..." : "Registrar EPC"}
+          </button>
 
-          <p>✔ Productos actualizados: <b>{result.updated}</b></p>
-          <p>⏱ Tiempo de proceso: <b>{result.durationMs} ms</b></p>
+          {saveMsg && <p className="text-sm mt-2">{saveMsg}</p>}
+        </form>
+      </section>
 
-          {result.notFound.length > 0 && (
-            <div>
-              <p className="text-red-400 mt-2">
-                ⚠ EPC no registrados ({result.notFound.length})
-              </p>
+      {/* ================= RFID CSV ================= */}
+      <section>
+        <h2 className="font-semibold mb-4">📤 Procesar archivo RFID (Zebra)</h2>
 
-              <ul className="text-xs text-neutral-400 mt-1 space-y-1">
-                {result.notFound.map((epc) => (
-                  <li key={epc}>{epc}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
-      )}
+        <form onSubmit={handleUpload} className="space-y-4">
+          <input
+            type="file"
+            accept=".csv"
+            onChange={(e) => setFile(e.target.files?.[0] || null)}
+            className="block w-full text-sm"
+            required
+          />
+
+          <button
+            disabled={loading}
+            className="bg-white text-black px-6 py-2 rounded disabled:opacity-50"
+          >
+            {loading ? "Procesando..." : "Actualizar inventario"}
+          </button>
+        </form>
+
+        {error && <p className="text-red-400 mt-4">{error}</p>}
+
+        {result && (
+          <div className="mt-6 p-4 bg-neutral-900 rounded">
+            <p>✔ Actualizados: {result.updated}</p>
+            <p>⏱ Tiempo: {result.durationMs} ms</p>
+
+            {result.notFound.length > 0 && (
+              <>
+                <p className="text-red-400 mt-2">
+                  EPC no registrados ({result.notFound.length})
+                </p>
+                <ul className="text-xs mt-1">
+                  {result.notFound.map((e) => (
+                    <li key={e}>{e}</li>
+                  ))}
+                </ul>
+              </>
+            )}
+          </div>
+        )}
+      </section>
 
       <ScrollToTop />
     </div>
