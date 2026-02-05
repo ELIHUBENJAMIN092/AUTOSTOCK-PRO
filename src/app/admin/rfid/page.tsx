@@ -104,7 +104,7 @@ export default function RFIDPage() {
     <div className="w-full overflow-x-hidden px-4 md:px-6 text-white max-w-4xl mx-auto space-y-10">
 
       <h1 className="text-2xl font-bold">
-        RFID · Gestión de Inventario
+        Inventario RFID
       </h1>
 
       {/* REGISTRAR EPC */}
@@ -131,7 +131,7 @@ export default function RFIDPage() {
             className="bg-neutral-800 px-4 py-2 rounded w-full"
             required
           >
-            <option value="">Selecciona producto RFID</option>
+            <option value="">Selecciona producto</option>
             {products.map((p) => (
               <option key={p._id} value={p._id}>
                 {p.name} {p.code && `(${p.code})`}

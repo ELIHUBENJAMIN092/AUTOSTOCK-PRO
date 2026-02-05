@@ -76,7 +76,7 @@ export default function ProductForm({ categories, onCreated }: Props) {
     <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-4 md:p-6 max-w-xl mx-auto">
 
       <h2 className="text-lg font-semibold mb-4">
-        Agregar Nuevo Producto
+         Producto
       </h2>
 
       {error && <p className="text-red-500 mb-3">{error}</p>}

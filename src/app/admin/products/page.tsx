@@ -10,7 +10,6 @@ import EditProductModal from "./components/EditProductModal";
 import SearchBar from "@/app/components/home/SearchBar";
 import ScrollToTop from "@/app/components/ScrollToTop";
 
-
 import type { Product } from "./types";
 
 export default function ProductsPage() {
@@ -35,54 +34,64 @@ export default function ProductsPage() {
   );
 
   const saveEdit = async () => {
-  if (!editProduct) return;
+    if (!editProduct) return;
 
-  setSaving(true);
+    setSaving(true);
 
-  await fetch(`/api/products/${editProduct._id}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      code: editProduct.code,
-      name: editProduct.name,
-      description: editProduct.description,
-      price: editProduct.price,
-      stock: editProduct.stock,
-      category: editProduct.category?._id,
-      isRFID: editProduct.isRFID, // 🔥🔥🔥 CLAVE
-      isActive: editProduct.isActive,
-    }),
-  });
+    await fetch(`/api/products/${editProduct._id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        code: editProduct.code,
+        name: editProduct.name,
+        description: editProduct.description,
+        price: editProduct.price,
+        stock: editProduct.stock,
+        category: editProduct.category?._id,
+        isRFID: editProduct.isRFID,
+        isActive: editProduct.isActive,
+      }),
+    });
 
-  setSaving(false);
-  setEditProduct(null);
-  refreshProducts();
-};
-
+    setSaving(false);
+    setEditProduct(null);
+    refreshProducts();
+  };
 
   if (loading) {
-    return <p className="text-neutral-400">Cargando productos...</p>;
+    return (
+      <div className="w-full px-4 text-neutral-400">
+        Cargando productos...
+      </div>
+    );
   }
 
   return (
-    <div className="p-6 space-y-8 text-white">
-      <h1 className="text-2xl font-bold">Productos</h1>
+    <div className="w-full overflow-x-hidden px-4 md:px-6 text-white max-w-5xl mx-auto space-y-8">
+
+      <h1 className="text-2xl font-bold">
+        Productos
+      </h1>
 
       {/* ➕ Crear */}
-      <ProductForm
-        categories={categories}
-        onCreated={refreshProducts}
-      />
+      <section className="max-w-full">
+        <ProductForm
+          categories={categories}
+          onCreated={refreshProducts}
+        />
+      </section>
 
       {/* 🔍 Buscar */}
-      <SearchBar
-        value={search}
-        onChange={setSearch}
-        placeholder="Buscar por nombre o código..."
-      />
+      <section className="max-w-full">
+        <SearchBar
+          value={search}
+          onChange={setSearch}
+          placeholder="Buscar por nombre o código..."
+        />
+      </section>
 
-      {/* Mobile */}
-      <div className="md:hidden">
+      {/* 📱 Mobile */}
+      <div className="md:hidden w-full overflow-x-hidden">
         <ProductsMobile
           products={filteredProducts}
           savedRow={savedRow}
@@ -92,8 +101,8 @@ export default function ProductsPage() {
         />
       </div>
 
-      {/* Desktop */}
-      <div className="hidden md:block">
+      {/* 🖥 Desktop */}
+      <div className="hidden md:block w-full overflow-x-auto">
         <ProductsTable
           products={filteredProducts}
           savedRow={savedRow}
@@ -103,6 +112,7 @@ export default function ProductsPage() {
         />
       </div>
 
+      {/* Modal */}
       {editProduct && (
         <EditProductModal
           product={editProduct}
@@ -113,7 +123,7 @@ export default function ProductsPage() {
           onSave={saveEdit}
         />
       )}
-      {/* ⬆️ Scroll to top */}
+
       <ScrollToTop />
     </div>
   );
