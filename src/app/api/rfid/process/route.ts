@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import csv from "csv-parser";
 import { Readable } from "stream";
 import { connectDB } from "@/lib/db";
-import RFIDTag from "@/models/RFIDTag";
 import Product from "@/models/Product";
+import RFIDTag from "@/models/RFIDTag";
 
 export async function POST(req: Request) {
   const start = Date.now();
@@ -13,64 +13,110 @@ export async function POST(req: Request) {
 
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
+
     if (!file) {
-      return NextResponse.json({ error: "Archivo no enviado" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Archivo CSV no enviado" },
+        { status: 400 }
+      );
     }
 
+    // =========================
+    // Leer CSV
+    // =========================
     const buffer = Buffer.from(await file.arrayBuffer());
-    const stream = Readable.from(buffer.toString());
+    const lines = buffer.toString().split("\n");
 
-    // 1️⃣ EPC detectados en el archivo
-    const detectedEPCs = new Set<string>();
+    const headerIndex = lines.findIndex((line) =>
+      line.toUpperCase().includes("TAG")
+    );
+
+    if (headerIndex === -1) {
+      return NextResponse.json(
+        { error: "No se encontró la columna TAG" },
+        { status: 400 }
+      );
+    }
+
+    const cleanCSV = lines.slice(headerIndex).join("\n");
+    const stream = Readable.from(cleanCSV);
+
+    // EPC únicos detectados
+    const scannedEpcs = new Set<string>();
 
     await new Promise<void>((resolve, reject) => {
       stream
         .pipe(csv())
         .on("data", (row: any) => {
           const epc = row.TAG?.trim();
-          if (epc) detectedEPCs.add(epc);
+          if (epc) scannedEpcs.add(epc);
         })
         .on("end", resolve)
         .on("error", reject);
     });
 
-    // 2️⃣ Buscar EPC registrados
+    // =========================
+    // Buscar EPC registrados
+    // =========================
     const tags = await RFIDTag.find({
-      epc: { $in: Array.from(detectedEPCs) },
+      epc: { $in: Array.from(scannedEpcs) },
     });
 
-    // 3️⃣ Agrupar por producto
-    const productCount = new Map<string, number>();
+    const notFound: string[] = [];
+
+    const productStock: Record<string, number> = {};
 
     for (const tag of tags) {
-      const pid = tag.product.toString();
-      productCount.set(pid, (productCount.get(pid) || 0) + 1);
+      const productId = tag.product.toString();
+
+      productStock[productId] =
+        (productStock[productId] || 0) + 1;
     }
 
-    // 4️⃣ Obtener TODOS los productos RFID
-    const rfidProducts = await Product.find({ isRFID: true });
+    // EPC sin registrar
+    for (const epc of scannedEpcs) {
+      if (!tags.find((t) => t.epc === epc)) {
+        notFound.push(epc);
+      }
+    }
+
+    // =========================
+    // 🔥 CLAVE DEL FIX
+    // Obtener TODOS los productos RFID
+    // =========================
+    const rfidProducts = await Product.find({
+      isRFID: true,
+      isActive: true,
+    }).select("_id");
 
     let updated = 0;
 
     for (const product of rfidProducts) {
-      const newStock = productCount.get(product._id.toString()) || 0;
+      const pid = product._id.toString();
 
-      if (product.stock !== newStock) {
-        product.stock = newStock;
-        await product.save();
-        updated++;
-      }
+      const newStock = productStock[pid] || 0;
+
+      await Product.findByIdAndUpdate(pid, {
+        $set: {
+          stock: newStock,
+          updatedAt: new Date(),
+        },
+      });
+
+      updated++;
     }
 
     return NextResponse.json({
       updated,
-      detectedTags: detectedEPCs.size,
+      notFound,
       durationMs: Date.now() - start,
     });
-  } catch (err) {
-    console.error("RFID PROCESS ERROR:", err);
+
+  } catch (error) {
+    console.error("RFID PROCESS ERROR:", error);
+
     return NextResponse.json(
-      { error: "Error procesando RFID" },
+      { error: "Error procesando archivo RFID" },
       { status: 500 }
     );
   }
