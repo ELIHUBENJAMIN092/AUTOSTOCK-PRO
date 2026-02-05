@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import csv from "csv-parser";
 import { Readable } from "stream";
 import { connectDB } from "@/lib/db";
-import Product from "@/models/Product";
 import RFIDTag from "@/models/RFIDTag";
+import Product from "@/models/Product";
 
 export async function POST(req: Request) {
   const start = Date.now();
@@ -13,99 +13,64 @@ export async function POST(req: Request) {
 
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
-
     if (!file) {
-      return NextResponse.json(
-        { error: "Archivo CSV no enviado" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Archivo no enviado" }, { status: 400 });
     }
 
-    // 📦 Leer archivo
     const buffer = Buffer.from(await file.arrayBuffer());
-    const lines = buffer.toString().split("\n");
+    const stream = Readable.from(buffer.toString());
 
-    // 🔎 Buscar fila donde empieza TAG
-    const headerIndex = lines.findIndex((line) =>
-      line.toUpperCase().includes("TAG")
-    );
+    // 1️⃣ EPC detectados en el archivo
+    const detectedEPCs = new Set<string>();
 
-    if (headerIndex === -1) {
-      return NextResponse.json(
-        { error: "No se encontró la columna TAG" },
-        { status: 400 }
-      );
-    }
-
-    // 🧼 Limpiar encabezados basura
-    const cleanCSV = lines.slice(headerIndex).join("\n");
-    const stream = Readable.from(cleanCSV);
-
-    // EPC → cantidad
-    const epcCount: Record<string, number> = {};
-
-    // 📖 Leer CSV Zebra
     await new Promise<void>((resolve, reject) => {
       stream
         .pipe(csv())
         .on("data", (row: any) => {
           const epc = row.TAG?.trim();
-          if (!epc) return;
-
-          // 👇 CLAVE: solo contar EPC únicos
-          epcCount[epc] = 1;
+          if (epc) detectedEPCs.add(epc);
         })
         .on("end", resolve)
         .on("error", reject);
     });
 
-
-    // 🔗 Buscar EPCs registrados
+    // 2️⃣ Buscar EPC registrados
     const tags = await RFIDTag.find({
-      epc: { $in: Object.keys(epcCount) },
+      epc: { $in: Array.from(detectedEPCs) },
     });
 
-    const productStock: Record<string, number> = {};
-    const notFound: string[] = [];
+    // 3️⃣ Agrupar por producto
+    const productCount = new Map<string, number>();
 
     for (const tag of tags) {
-      const epc = tag.epc;
-      const productId = tag.product.toString();
-      const qty = epcCount[epc] || 0;
-
-      productStock[productId] =
-        (productStock[productId] || 0) + qty;
+      const pid = tag.product.toString();
+      productCount.set(pid, (productCount.get(pid) || 0) + 1);
     }
 
-    // ⚠ EPC no registrados
-    for (const epc of Object.keys(epcCount)) {
-      if (!tags.find((t) => t.epc === epc)) {
-        notFound.push(epc);
-      }
-    }
+    // 4️⃣ Obtener TODOS los productos RFID
+    const rfidProducts = await Product.find({ isRFID: true });
 
-    // 📦 Actualizar stock de productos
     let updated = 0;
 
-    for (const [productId, stock] of Object.entries(productStock)) {
-      await Product.findByIdAndUpdate(productId, {
-        $set: {
-          stock,
-          updatedAt: new Date(),
-        },
-      });
-      updated++;
+    for (const product of rfidProducts) {
+      const newStock = productCount.get(product._id.toString()) || 0;
+
+      if (product.stock !== newStock) {
+        product.stock = newStock;
+        await product.save();
+        updated++;
+      }
     }
 
     return NextResponse.json({
       updated,
-      notFound,
+      detectedTags: detectedEPCs.size,
       durationMs: Date.now() - start,
     });
-  } catch (error) {
-    console.error("RFID PROCESS ERROR:", error);
+  } catch (err) {
+    console.error("RFID PROCESS ERROR:", err);
     return NextResponse.json(
-      { error: "Error procesando archivo RFID" },
+      { error: "Error procesando RFID" },
       { status: 500 }
     );
   }

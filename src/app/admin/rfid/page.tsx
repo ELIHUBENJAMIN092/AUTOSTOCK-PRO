@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import ScrollToTop from "@/app/components/ScrollToTop";
+import toast from "react-hot-toast";
+import { UploadCloud } from "lucide-react";
 
 type Product = {
   _id: string;
@@ -21,13 +23,11 @@ export default function RFIDPage() {
   const [productId, setProductId] = useState("");
   const [products, setProducts] = useState<Product[]>([]);
   const [saving, setSaving] = useState(false);
-  const [saveMsg, setSaveMsg] = useState<string | null>(null);
 
   /* ---------------- RFID CSV ---------------- */
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<RFIDResult | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
   /* ---------------- LOAD PRODUCTS ---------------- */
   useEffect(() => {
@@ -42,23 +42,22 @@ export default function RFIDPage() {
     e.preventDefault();
     if (!epc || !productId) return;
 
-    setSaving(true);
-    setSaveMsg(null);
-
     try {
+      setSaving(true);
+
       const res = await fetch("/api/rfid/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ epc, productId }),
       });
 
-      if (!res.ok) throw new Error("Error al registrar EPC");
+      if (!res.ok) throw new Error();
 
-      setSaveMsg("✅ EPC registrado correctamente");
+      toast.success("EPC registrado correctamente");
       setEpc("");
       setProductId("");
-    } catch (err: any) {
-      setSaveMsg(err.message);
+    } catch {
+      toast.error("Error registrando EPC");
     } finally {
       setSaving(false);
     }
@@ -69,11 +68,10 @@ export default function RFIDPage() {
     e.preventDefault();
     if (!file) return;
 
-    setLoading(true);
-    setError(null);
-    setResult(null);
-
     try {
+      setLoading(true);
+      setResult(null);
+
       const formData = new FormData();
       formData.append("file", file);
 
@@ -82,40 +80,54 @@ export default function RFIDPage() {
         body: formData,
       });
 
-      if (!res.ok) throw new Error("Error al procesar el archivo RFID");
+      if (!res.ok) throw new Error();
 
-      setResult(await res.json());
-    } catch (err: any) {
-      setError(err.message);
+      const data = await res.json();
+      setResult(data);
+
+      toast.success("Inventario actualizado");
+    } catch {
+      toast.error("Error procesando archivo");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="p-6 text-white max-w-3xl space-y-10">
-      <h1 className="text-2xl font-bold">RFID · Gestión de Inventario</h1>
+    <div className="p-6 text-white max-w-4xl mx-auto space-y-10">
 
-      {/* ================= REGISTRO EPC ================= */}
-      <section className="p-4 bg-neutral-900 border border-neutral-800 rounded">
-        <h2 className="font-semibold mb-4">➕ Registrar EPC</h2>
+      <h1 className="text-2xl font-bold">
+        RFID · Gestión de Inventario
+      </h1>
 
-        <form onSubmit={handleSaveEPC} className="space-y-3">
+      {/* ================= REGISTRAR EPC ================= */}
+      <section className="bg-neutral-900 border border-neutral-800 rounded-xl p-4 md:p-6">
+
+        <h2 className="text-lg font-semibold mb-4">
+          Registrar EPC
+        </h2>
+
+        <form
+          onSubmit={handleSaveEPC}
+          className="flex flex-col gap-4 md:grid md:grid-cols-2"
+        >
+
           <input
             value={epc}
             onChange={(e) => setEpc(e.target.value)}
-            placeholder="EPC (ej: 300833B2DDD9014000000001)"
-            className="w-full p-2 bg-neutral-800 rounded"
+            placeholder="EPC"
+            className="bg-neutral-800 px-4 py-2 rounded"
             required
           />
 
           <select
             value={productId}
             onChange={(e) => setProductId(e.target.value)}
-            className="w-full p-2 bg-neutral-800 rounded"
+            className="bg-neutral-800 px-4 py-2 rounded"
             required
           >
-            <option value="">Selecciona producto</option>
+            <option value="">Selecciona producto RFID</option>
+
             {products.map((p) => (
               <option key={p._id} value={p._id}>
                 {p.name} {p.code && `(${p.code})`}
@@ -124,41 +136,74 @@ export default function RFIDPage() {
           </select>
 
           <button
+            type="submit"
             disabled={saving}
-            className="bg-white text-black px-4 py-2 rounded disabled:opacity-50"
+            className="md:col-span-2 bg-white text-black py-3 rounded font-semibold"
           >
             {saving ? "Guardando..." : "Registrar EPC"}
           </button>
 
-          {saveMsg && <p className="text-sm mt-2">{saveMsg}</p>}
         </form>
       </section>
 
-      {/* ================= RFID CSV ================= */}
-      <section>
-        <h2 className="font-semibold mb-4">📤 Procesar archivo RFID (Zebra)</h2>
 
-        <form onSubmit={handleUpload} className="space-y-4">
+      {/* ================= SUBIR CSV ================= */}
+      <section className="bg-neutral-900 border border-neutral-800 rounded-xl p-4 md:p-6">
+
+        <h2 className="text-lg font-semibold mb-4">
+          Procesar archivo Zebra RFID
+        </h2>
+
+        <form onSubmit={handleUpload} className="space-y-5">
+
+          {/* Upload estilo ProductForm */}
           <input
             type="file"
+            id="rfidUpload"
+            hidden
             accept=".csv"
             onChange={(e) => setFile(e.target.files?.[0] || null)}
-            className="block w-full text-sm"
-            required
           />
 
+          {!file ? (
+            <label
+              htmlFor="rfidUpload"
+              className="w-full h-36 border-2 border-dashed
+                         border-neutral-600 rounded-xl
+                         flex flex-col items-center justify-center
+                         cursor-pointer hover:bg-neutral-800 transition"
+            >
+              <UploadCloud size={36} />
+              <span className="text-sm mt-2">
+                Seleccionar archivo CSV
+              </span>
+            </label>
+          ) : (
+            <div className="bg-neutral-800 rounded p-3 flex justify-between items-center">
+              <span className="text-sm">{file.name}</span>
+
+              <button
+                type="button"
+                onClick={() => setFile(null)}
+                className="text-xs bg-black/60 px-3 py-1 rounded"
+              >
+                Cambiar
+              </button>
+            </div>
+          )}
+
           <button
+            type="submit"
             disabled={loading}
-            className="bg-white text-black px-6 py-2 rounded disabled:opacity-50"
+            className="w-full bg-white text-black py-3 rounded font-semibold"
           >
-            {loading ? "Procesando..." : "Actualizar inventario"}
+            {loading ? "Procesando..." : "Actualizar Inventario"}
           </button>
         </form>
 
-        {error && <p className="text-red-400 mt-4">{error}</p>}
-
+        {/* RESULTADO */}
         {result && (
-          <div className="mt-6 p-4 bg-neutral-900 rounded">
+          <div className="mt-6 bg-neutral-800 p-4 rounded">
             <p>✔ Actualizados: {result.updated}</p>
             <p>⏱ Tiempo: {result.durationMs} ms</p>
 
@@ -167,7 +212,8 @@ export default function RFIDPage() {
                 <p className="text-red-400 mt-2">
                   EPC no registrados ({result.notFound.length})
                 </p>
-                <ul className="text-xs mt-1">
+
+                <ul className="text-xs mt-1 space-y-1">
                   {result.notFound.map((e) => (
                     <li key={e}>{e}</li>
                   ))}
@@ -176,6 +222,7 @@ export default function RFIDPage() {
             )}
           </div>
         )}
+
       </section>
 
       <ScrollToTop />
