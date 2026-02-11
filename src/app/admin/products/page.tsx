@@ -75,9 +75,9 @@ export default function ProductsPage() {
   }
 
   return (
-    <div className="w-full overflow-x-hidden px-4 md:px-6 text-white max-w-4xl mx-auto space-y-6">
+    <div className="w-full overflow-x-hidden px-4 md:px-6 text-white max-w-4xl mx-auto space-y-10">
 
-      <h1 className="text-xl md:text-2xl font-bold">
+      <h1 className="text-2xl font-bold">
         Productos
       </h1>
 

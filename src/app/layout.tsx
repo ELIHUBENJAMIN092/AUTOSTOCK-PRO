@@ -33,7 +33,7 @@ export default function RootLayout({
 
         {/* ✅ CONTENEDOR GLOBAL DE NOTIFICACIONES */}
         <Toaster
-          position="top-right"
+          position="top-center"
           toastOptions={{
             duration: 2500,
             style: {
