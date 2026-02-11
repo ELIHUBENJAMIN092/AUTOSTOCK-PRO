@@ -53,8 +53,6 @@ export default function ProductForm({ categories, onCreated }: Props) {
 
       await axios.post("/api/products", formData);
 
-      toast.success("Producto creado correctamente ✅");
-
       // RESET FORM
       setCode("");
       setName("");

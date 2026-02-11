@@ -8,7 +8,7 @@ export default function Hero() {
           <div className="w-full lg:w-1/2 text-center lg:text-left">
             <h1 className="text-5xl lg:text-6xl xl:text-7xl font-semibold leading-tight mb-6
               text-transparent bg-clip-text bg-gradient-to-r from-white to-neutral-400">
-              Control Total los Repuestos
+              Control Total de Productos
             </h1>
 
             <p className="text-neutral-300 text-lg max-w-xl mx-auto lg:mx-0 mb-10">
@@ -52,9 +52,6 @@ export default function Hero() {
                     alt="AutoStock Pro"
                     className="h-6 brightness-0 invert"
                   />
-                  <span className="text-white font-semibold">
-                    AutoStock-Pro
-                  </span>
                 </div>
 
                 {/* MÉTRICAS */}

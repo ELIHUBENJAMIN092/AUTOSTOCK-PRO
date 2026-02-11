@@ -82,7 +82,7 @@ export default function ProductsPage() {
       </h1>
 
       {/* ➕ Crear */}
-      <section className="w-full">
+      <section className="w-full overflow-x-auto">
         <ProductForm
           categories={categories}
           onCreated={handleCreated}
@@ -90,7 +90,7 @@ export default function ProductsPage() {
       </section>
 
       {/* 🔍 Buscar */}
-      <section className="w-full">
+      <section className="w-full overflow-x-auto">
         <SearchBar
           value={search}
           onChange={setSearch}
@@ -99,7 +99,7 @@ export default function ProductsPage() {
       </section>
 
       {/* 📱 Mobile */}
-      <div className="md:hidden w-full">
+      <div className="md:hidden w-full overflow-x-auto">
         <ProductsMobile
           products={filteredProducts}
           savedRow={savedRow}

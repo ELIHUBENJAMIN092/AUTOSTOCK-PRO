@@ -49,7 +49,7 @@ export default function Inventory() {
 
         <h2 className="text-5xl text-center font-medium text-transparent bg-clip-text
           bg-gradient-to-r from-gray-100 to-gray-300 mb-10">
-          Inventario de Repuestos
+          Inventario de Productos
         </h2>
 
         <SearchBar
