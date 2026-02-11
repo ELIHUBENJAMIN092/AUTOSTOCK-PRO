@@ -28,8 +28,11 @@ export default function RFIDPage() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<RFIDResult | null>(null);
 
-  // ✅ NUEVO
   const [success, setSuccess] = useState(false);
+
+  // ⭐⭐⭐ BATCH MODULE STATE
+  const [batchText, setBatchText] = useState("");
+  const [batchSaving, setBatchSaving] = useState(false);
 
   useEffect(() => {
     fetch("/api/products?rfid=true")
@@ -63,6 +66,49 @@ export default function RFIDPage() {
     }
   };
 
+  // ⭐⭐⭐ BATCH MODULE HANDLER
+  const handleBatchRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!batchText || !productId) {
+      toast.error("Falta EPC o producto");
+      return;
+    }
+
+    const epcs = batchText
+      .split("\n")
+      .map((e) => e.trim())
+      .filter(Boolean);
+
+    if (!epcs.length) {
+      toast.error("No hay EPC válidos");
+      return;
+    }
+
+    try {
+      setBatchSaving(true);
+
+      const res = await fetch("/api/rfid/batch-register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ epcs, productId }),
+      });
+
+      if (!res.ok) throw new Error();
+
+      const data = await res.json();
+
+      toast.success(`Registrados: ${data.inserted}`);
+
+      setBatchText("");
+
+    } catch {
+      toast.error("Error en registro batch");
+    } finally {
+      setBatchSaving(false);
+    }
+  };
+
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) return;
@@ -90,7 +136,7 @@ export default function RFIDPage() {
         notFound: Array.isArray(data.notFound) ? data.notFound : [],
       });
 
-      setSuccess(true); // ✅ CHECK VERDE
+      setSuccess(true);
       toast.success("Inventario actualizado");
 
     } catch {
@@ -149,9 +195,34 @@ export default function RFIDPage() {
         </form>
       </section>
 
+      {/* ⭐⭐⭐ BATCH REGISTER UI */}
+      <section className="bg-neutral-900 border border-neutral-800 rounded-xl p-4 md:p-6">
+        <h2 className="text-lg font-semibold mb-4">
+          Registro Masivo EPC
+        </h2>
+
+        <form onSubmit={handleBatchRegister} className="space-y-4">
+
+          <textarea
+            value={batchText}
+            onChange={(e) => setBatchText(e.target.value)}
+            placeholder="1 EPC por línea..."
+            className="bg-neutral-800 w-full p-3 rounded h-40"
+          />
+
+          <button
+            type="submit"
+            disabled={batchSaving}
+            className="w-full bg-white text-black py-3 rounded font-semibold"
+          >
+            {batchSaving ? "Registrando..." : "Registrar Lote"}
+          </button>
+
+        </form>
+      </section>
+
       {/* SUBIR CSV */}
       <section className="bg-neutral-900 border border-neutral-800 rounded-xl p-4 md:p-6 max-w-full">
-
         <h2 className="text-lg font-semibold mb-4">
           Procesar archivo Zebra RFID
         </h2>
@@ -165,7 +236,7 @@ export default function RFIDPage() {
             accept=".csv"
             onChange={(e) => {
               setFile(e.target.files?.[0] || null);
-              setSuccess(false); // reset visual
+              setSuccess(false);
             }}
           />
 
@@ -201,7 +272,6 @@ export default function RFIDPage() {
             {loading ? "Procesando..." : "Actualizar Inventario"}
           </button>
 
-          {/* ✅ CHECK VISUAL VERDE */}
           {success && (
             <div className="flex items-center gap-2 text-green-400 font-semibold animate-pulse">
               <CheckCircle size={22} />
