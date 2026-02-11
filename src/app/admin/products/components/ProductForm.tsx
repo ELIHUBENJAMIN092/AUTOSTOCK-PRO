@@ -40,7 +40,7 @@ export default function ProductForm({ categories, onCreated }: Props) {
       setLoading(true);
 
       const formData = new FormData();
-      formData.append("code", code);
+      formData.append("code", code.trim().toUpperCase());
       formData.append("name", name);
       formData.append("description", description);
       formData.append("price", price);
@@ -53,9 +53,9 @@ export default function ProductForm({ categories, onCreated }: Props) {
 
       await axios.post("/api/products", formData);
 
-      toast.success("Producto creado correctamente");
+      toast.success("Producto creado correctamente ✅");
 
-      // reset
+      // RESET FORM
       setCode("");
       setName("");
       setDescription("");
@@ -65,8 +65,18 @@ export default function ProductForm({ categories, onCreated }: Props) {
       setImage(null);
 
       onCreated?.();
+
     } catch (err: any) {
-      toast.error(err.response?.data?.error || "Error creando producto");
+      const status = err.response?.status;
+      const message = err.response?.data?.error;
+
+      if (status === 409) {
+        toast.error("⚠️ Ya existe un producto registrado con este código");
+      } else if (message) {
+        toast.error(message);
+      } else {
+        toast.error("Error inesperado al crear producto");
+      }
     } finally {
       setLoading(false);
     }
@@ -76,7 +86,7 @@ export default function ProductForm({ categories, onCreated }: Props) {
     <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-4 md:p-6 max-w-xl mx-auto">
 
       <h2 className="text-lg font-semibold mb-4">
-         Producto
+        Producto
       </h2>
 
       {error && <p className="text-red-500 mb-3">{error}</p>}
@@ -88,10 +98,11 @@ export default function ProductForm({ categories, onCreated }: Props) {
 
         {/* DATOS */}
         <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+
           <input
             placeholder="Código"
             value={code}
-            onChange={(e) => setCode(e.target.value)}
+            onChange={(e) => setCode(e.target.value.toUpperCase())}
             className="bg-neutral-800 px-4 py-2 rounded"
           />
 
@@ -137,10 +148,12 @@ export default function ProductForm({ categories, onCreated }: Props) {
               </option>
             ))}
           </select>
+
         </div>
 
         {/* IMAGEN */}
         <div className="flex justify-center">
+
           <input
             type="file"
             id="imageUpload"
@@ -178,6 +191,7 @@ export default function ProductForm({ categories, onCreated }: Props) {
               </button>
             </div>
           )}
+
         </div>
 
         <button
@@ -187,6 +201,7 @@ export default function ProductForm({ categories, onCreated }: Props) {
         >
           {loading ? "Guardando..." : "Agregar Producto"}
         </button>
+
       </form>
     </div>
   );

@@ -10,6 +10,8 @@ import EditProductModal from "./components/EditProductModal";
 import SearchBar from "@/app/components/home/SearchBar";
 import ScrollToTop from "@/app/components/ScrollToTop";
 
+import toast from "react-hot-toast"; // ✅ añadido
+
 import type { Product } from "./types";
 
 export default function ProductsPage() {
@@ -32,6 +34,12 @@ export default function ProductsPage() {
       p.name.toLowerCase().includes(search.toLowerCase()) ||
       (p.code ?? "").toLowerCase().includes(search.toLowerCase())
   );
+
+  // ✅ NUEVO — notificación sutil
+  const handleCreated = () => {
+    refreshProducts();
+    toast.success("Producto creado exitosamente");
+  };
 
   const saveEdit = async () => {
     if (!editProduct) return;
@@ -67,22 +75,22 @@ export default function ProductsPage() {
   }
 
   return (
-    <div className="w-full overflow-x-hidden px-4 md:px-6 text-white max-w-5xl mx-auto space-y-8">
+    <div className="w-full overflow-x-hidden px-4 md:px-6 text-white max-w-4xl mx-auto space-y-6">
 
-      <h1 className="text-2xl font-bold">
+      <h1 className="text-xl md:text-2xl font-bold">
         Productos
       </h1>
 
       {/* ➕ Crear */}
-      <section className="max-w-full">
+      <section className="w-full">
         <ProductForm
           categories={categories}
-          onCreated={refreshProducts}
+          onCreated={handleCreated}
         />
       </section>
 
       {/* 🔍 Buscar */}
-      <section className="max-w-full">
+      <section className="w-full">
         <SearchBar
           value={search}
           onChange={setSearch}
@@ -91,7 +99,7 @@ export default function ProductsPage() {
       </section>
 
       {/* 📱 Mobile */}
-      <div className="md:hidden w-full overflow-x-hidden">
+      <div className="md:hidden w-full">
         <ProductsMobile
           products={filteredProducts}
           savedRow={savedRow}

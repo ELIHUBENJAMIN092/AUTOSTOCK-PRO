@@ -21,14 +21,17 @@ export async function GET() {
       .lean();
 
     return NextResponse.json(products);
+
   } catch (error) {
     console.error("GET /api/products error:", error);
+
     return NextResponse.json(
       { error: "Error obteniendo productos" },
       { status: 500 }
     );
   }
 }
+
 
 /**
  * POST → crear producto (FormData + imagen Cloudinary)
@@ -39,8 +42,14 @@ export async function POST(req: Request) {
 
     const formData = await req.formData();
 
-    const code = formData.get("code")?.toString().toUpperCase();
-    const name = formData.get("name")?.toString();
+    // ✅ Normalización segura
+    const code = formData
+      .get("code")
+      ?.toString()
+      .trim()
+      .toUpperCase();
+
+    const name = formData.get("name")?.toString().trim();
     const description = formData.get("description")?.toString() || "";
     const price = Number(formData.get("price"));
     const stock = Number(formData.get("stock") || 0);
@@ -51,7 +60,7 @@ export async function POST(req: Request) {
     // 🔴 Validaciones obligatorias
     if (!code || !name || isNaN(price) || !category) {
       return NextResponse.json(
-        { error: "Code, nombre, precio y categoría son obligatorios" },
+        { error: "Código, nombre, precio y categoría son obligatorios" },
         { status: 400 }
       );
     }
@@ -69,13 +78,18 @@ export async function POST(req: Request) {
       );
     }
 
-    // ❌ Evitar código duplicado
-    const codeExists = await Product.findOne({ code });
+    // ❌ Evitar código duplicado (MEJORADO)
+    const codeExists = await Product.findOne({
+      code: code,
+    });
 
     if (codeExists) {
       return NextResponse.json(
-        { error: "El número de parte ya existe" },
-        { status: 400 }
+        {
+          error: "Ya existe un producto registrado con este código",
+          field: "code",
+        },
+        { status: 409 }
       );
     }
 
@@ -95,7 +109,7 @@ export async function POST(req: Request) {
         ).end(buffer);
       });
 
-      image = uploadResult.secure_url; // ✅ URL REAL
+      image = uploadResult.secure_url;
     }
 
     // ✅ Crear producto
@@ -107,13 +121,15 @@ export async function POST(req: Request) {
       stock,
       minStock,
       category,
-      image, // 👈 ahora es URL Cloudinary
+      image,
       isActive: true,
     });
 
     return NextResponse.json(product, { status: 201 });
+
   } catch (error) {
     console.error("POST /api/products error:", error);
+
     return NextResponse.json(
       { error: "Error creando producto" },
       { status: 500 }
