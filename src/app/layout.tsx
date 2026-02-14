@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Toaster } from "react-hot-toast";   // ✅ AÑADIDO
+import { Toaster } from "react-hot-toast";
+import Providers from "./providers";   // ⭐ IMPORTANTE
 import "./globals.css";
 
 const geistSans = Geist({
@@ -29,9 +30,12 @@ export default function RootLayout({
         suppressHydrationWarning
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white text-neutral-900`}
       >
-        {children}
 
-        {/* ✅ CONTENEDOR GLOBAL DE NOTIFICACIONES */}
+        {/* ✅ ENVOLTORIO CLIENT SAFE */}
+        <Providers>
+          {children}
+        </Providers>
+
         <Toaster
           position="top-center"
           toastOptions={{
@@ -45,6 +49,7 @@ export default function RootLayout({
             },
           }}
         />
+
       </body>
     </html>
   );
