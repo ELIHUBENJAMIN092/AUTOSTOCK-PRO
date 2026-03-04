@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import ScrollToTop from "@/app/components/ScrollToTop";
 import toast from "react-hot-toast";
 import { UploadCloud, CheckCircle } from "lucide-react";
+import SearchEPC from "./components/SearchEPC";
 
 type Product = {
   _id: string;
@@ -152,6 +153,9 @@ export default function RFIDPage() {
       <h1 className="text-2xl font-bold">
         Inventario RFID
       </h1>
+
+      {/* 🔎 BUSCAR EPC */}
+      <SearchEPC />
 
       {/* REGISTRAR EPC */}
       <section className="bg-neutral-900 border border-neutral-800 rounded-xl p-4 md:p-6 max-w-full">
