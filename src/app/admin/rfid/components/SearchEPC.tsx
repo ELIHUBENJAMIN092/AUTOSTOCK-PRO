@@ -96,7 +96,7 @@ export default function SearchEPCModule() {
 
   return (
     <section className="bg-neutral-900 border border-neutral-800 rounded-xl p-4 md:p-6">
-      <h2 className="text-lg font-semibold mb-4">Buscar EPC</h2>
+      <h2 className="text-lg font-semibold mb-4">Buscar EPC RFID</h2>
 
       <div className="relative mb-4">
         <input
