@@ -19,28 +19,30 @@ export default function ProductsMobile({
   onEdit,
 }: Props) {
   return (
-    <div className="space-y-4">
+    <div className="w-full max-w-full space-y-4 overflow-hidden">
       {products.map((product) => (
         <div
           key={product._id}
-          className="rounded-xl border border-neutral-800 bg-neutral-900/40 p-4"
+          className="w-full rounded-xl border border-neutral-800 bg-neutral-900/40 p-4 overflow-hidden"
         >
-          <div className="font-medium text-neutral-100">
+          <div className="font-medium text-neutral-100 break-words">
             {product.name}
           </div>
 
-          <div className="text-sm text-neutral-400 mb-3">
+          <div className="text-sm text-neutral-400 mb-4">
             Stock: {product.stock}
           </div>
 
-          <div className="flex justify-end">
-            <ProductActions
-              product={product}
-              savedRow={savedRow}
-              onUpdateStock={updateStock}
-              onSave={saveStock}
-              onEdit={onEdit}
-            />
+          <div className="w-full overflow-hidden">
+            <div className="flex flex-wrap gap-2 justify-end">
+              <ProductActions
+                product={product}
+                savedRow={savedRow}
+                onUpdateStock={updateStock}
+                onSave={saveStock}
+                onEdit={onEdit}
+              />
+            </div>
           </div>
         </div>
       ))}

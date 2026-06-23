@@ -68,19 +68,19 @@ export default function ProductsPage() {
   }
 
   return (
-    <div className="w-full overflow-x-hidden px-4 md:px-6 text-white max-w-5xl mx-auto space-y-8">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div className="w-full max-w-full overflow-x-hidden px-4 text-white mx-auto space-y-6">
+      <div className="flex flex-col gap-4">
         <h1 className="text-2xl font-bold">Productos</h1>
 
         <Link
           href="/admin/products/crear"
-          className="bg-white text-black px-5 py-3 rounded-lg font-semibold text-center hover:bg-neutral-200 transition"
+          className="w-full bg-white text-black px-5 py-3 rounded-lg font-semibold text-center hover:bg-neutral-200 transition"
         >
           + Crear producto
         </Link>
       </div>
 
-      <section className="w-full">
+      <section className="w-full overflow-hidden">
         <SearchBar
           value={search}
           onChange={setSearch}
@@ -88,7 +88,7 @@ export default function ProductsPage() {
         />
       </section>
 
-      <div className="md:hidden w-full overflow-x-auto">
+      <div className="md:hidden w-full overflow-hidden">
         <ProductsMobile
           products={filteredProducts}
           savedRow={savedRow}
