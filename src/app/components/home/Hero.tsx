@@ -45,13 +45,25 @@ export default function Hero() {
               {/* Card */}
               <div className="relative bg-neutral-900 border border-white/10 rounded-3xl p-10 shadow-2xl">
 
-                {/* LOGO */}
-                <div className="flex items-center gap-3 mb-8">
-                  <img
-                    src="https://static.shuffle.dev/uploads/files/ac/ac180bf4933c1e0d7ef4aa78934b884e39b64e5d/logos/logo-78d34ac57821d853aaf47e300463f4f0.png"
-                    alt="AutoStock Pro"
-                    className="h-6 brightness-0 invert"
-                  />
+                {/* RFID READER */}
+                <div className="mb-8">
+                  <div
+                    className="
+                    bg-white
+                   rounded-3xl
+                   p-6
+                   shadow-2xl
+                   flex
+                   justify-center
+                   items-center
+                   "
+                  >
+                    <img
+                      src="/images/tc22r.png"
+                      alt="Zebra TC22R RFID"
+                      className="max-h-72 object-contain"
+                    />
+                  </div>
                 </div>
 
                 {/* MÉTRICAS */}

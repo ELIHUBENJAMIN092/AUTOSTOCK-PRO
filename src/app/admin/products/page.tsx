@@ -5,13 +5,11 @@ import { useProducts } from "./hooks/useProducts";
 
 import ProductsTable from "./components/ProductsTable";
 import ProductsMobile from "./components/ProductsMobile";
-import ProductForm from "./components/ProductForm";
 import EditProductModal from "./components/EditProductModal";
 import SearchBar from "@/app/components/home/SearchBar";
 import ScrollToTop from "@/app/components/ScrollToTop";
 
-import toast from "react-hot-toast"; // ✅ añadido
-
+import Link from "next/link";
 import type { Product } from "./types";
 
 export default function ProductsPage() {
@@ -35,12 +33,6 @@ export default function ProductsPage() {
       (p.code ?? "").toLowerCase().includes(search.toLowerCase())
   );
 
-  // ✅ NUEVO — notificación sutil
-  const handleCreated = () => {
-    refreshProducts();
-    toast.success("Producto creado exitosamente");
-  };
-
   const saveEdit = async () => {
     if (!editProduct) return;
 
@@ -55,6 +47,7 @@ export default function ProductsPage() {
         description: editProduct.description,
         price: editProduct.price,
         stock: editProduct.stock,
+        minStock: editProduct.minStock,
         category: editProduct.category?._id,
         isRFID: editProduct.isRFID,
         isActive: editProduct.isActive,
@@ -75,22 +68,19 @@ export default function ProductsPage() {
   }
 
   return (
-    <div className="w-full overflow-x-hidden px-4 md:px-6 text-white max-w-4xl mx-auto space-y-10">
+    <div className="w-full overflow-x-hidden px-4 md:px-6 text-white max-w-5xl mx-auto space-y-8">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <h1 className="text-2xl font-bold">Productos</h1>
 
-      <h1 className="text-2xl font-bold">
-        Productos
-      </h1>
+        <Link
+          href="/admin/products/crear"
+          className="bg-white text-black px-5 py-3 rounded-lg font-semibold text-center hover:bg-neutral-200 transition"
+        >
+          + Crear producto
+        </Link>
+      </div>
 
-      {/* ➕ Crear */}
-      <section className="w-full overflow-x-auto">
-        <ProductForm
-          categories={categories}
-          onCreated={handleCreated}
-        />
-      </section>
-
-      {/* 🔍 Buscar */}
-      <section className="w-full overflow-x-auto">
+      <section className="w-full">
         <SearchBar
           value={search}
           onChange={setSearch}
@@ -98,7 +88,6 @@ export default function ProductsPage() {
         />
       </section>
 
-      {/* 📱 Mobile */}
       <div className="md:hidden w-full overflow-x-auto">
         <ProductsMobile
           products={filteredProducts}
@@ -109,7 +98,6 @@ export default function ProductsPage() {
         />
       </div>
 
-      {/* 🖥 Desktop */}
       <div className="hidden md:block w-full overflow-x-auto">
         <ProductsTable
           products={filteredProducts}
@@ -120,7 +108,6 @@ export default function ProductsPage() {
         />
       </div>
 
-      {/* Modal */}
       {editProduct && (
         <EditProductModal
           product={editProduct}
