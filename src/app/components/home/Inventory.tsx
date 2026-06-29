@@ -46,12 +46,19 @@ export default function Inventory() {
   const categories = Array.from(
     new Set(
       products
-        .map(p => p.category?.name)
+        .map(p => {
+          if (!p.category) return null
+          return typeof p.category === 'string' ? p.category : p.category.name
+        })
         .filter(Boolean)
     )
   )
 
-  const filtered = products.filter(p => category === 'all' || p.category?.name === category)
+  const filtered = products.filter(p => {
+    if (category === 'all') return true
+    if (!p.category) return false
+    return typeof p.category === 'string' ? p.category === category : p.category.name === category
+  })
   const visibleProducts = filtered
 
   return (
