@@ -91,12 +91,11 @@ export default function Inventory() {
   return (
     <section
       id="inventario"
-      className="bg-gradient-to-b from-neutral-950 via-neutral-900 to-neutral-950 py-20"
+      className="bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 py-20"
     >
       <div className="container px-4 mx-auto">
 
-        <h2 className="text-5xl text-center font-medium text-transparent bg-clip-text
-          bg-gradient-to-r from-gray-100 to-gray-300 mb-10">
+        <h2 className="text-5xl text-center font-medium text-transparent bg-clip-text bg-gradient-to-r from-cyan-200 via-sky-200 to-violet-200 mb-10">
           Inventario de Productos
         </h2>
 
@@ -106,11 +105,13 @@ export default function Inventory() {
           placeholder="Buscar por nombre, número de parte o EPC..."
         />
 
-        <CategoryFilter
-          categories={categories}
-          value={category}
-          onChange={setCategory}
-        />
+        <div className="mt-6">
+          <CategoryFilter
+            categories={categories}
+            value={category}
+            onChange={setCategory}
+          />
+        </div>
 
         {loading ? (
           <p className="text-center text-neutral-400">Cargando...</p>
@@ -130,8 +131,7 @@ export default function Inventory() {
               <div className="flex justify-center mt-10">
                 <button
                   onClick={() => setShowAll(!showAll)}
-                  className="px-6 py-3 rounded-xl bg-white text-black font-semibold
-                             hover:opacity-90 transition"
+                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-sky-500 text-slate-950 font-semibold shadow-xl shadow-cyan-500/20 transition hover:opacity-95"
                 >
                   {showAll ? "Ver menos" : "Ver más productos"}
                 </button>

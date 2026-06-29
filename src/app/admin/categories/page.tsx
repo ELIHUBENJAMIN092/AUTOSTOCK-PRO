@@ -52,83 +52,97 @@ export default function CategoriesPage() {
   };
 
   return (
-    <div className="p-6 text-white">
-      <h1 className="text-2xl font-bold mb-4">Categorías</h1>
+    <div className="w-full max-w-screen-xl mx-auto px-4 py-6 text-white">
+      <div className="mb-8 overflow-hidden rounded-[2rem] bg-gradient-to-r from-slate-950 via-cyan-950 to-slate-900 p-6 shadow-2xl shadow-cyan-500/10">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm uppercase tracking-[0.3em] text-cyan-300">Panel de categorías</p>
+            <h1 className="text-3xl font-bold text-white">Gestión de categorías</h1>
+            <p className="mt-2 max-w-2xl text-neutral-300">
+              Crea y administra las categorías del inventario con un control rápido de estado activo o inactivo.
+            </p>
+          </div>
 
-      {/* ✅ BOTÓN MOSTRAR / OCULTAR INACTIVAS */}
-      <button
-        onClick={() => setShowInactive(!showInactive)}
-        className="mb-6 text-sm underline text-neutral-400"
-      >
-        {showInactive
-          ? "Ocultar categorías inactivas"
-          : "Mostrar categorías inactivas"}
-      </button>
+          <button
+            onClick={() => setShowInactive(!showInactive)}
+            className={`inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold transition ${showInactive
+              ? "border border-emerald-400 bg-emerald-500/15 text-emerald-200"
+              : "border border-slate-700 bg-slate-900 text-slate-200 hover:border-emerald-400 hover:text-emerald-200"
+            }`}
+          >
+            {showInactive ? "Ocultar inactivas" : "Mostrar inactivas"}
+          </button>
+        </div>
+      </div>
 
-      {/* Formulario */}
-      <form onSubmit={createCategory} className="mb-8 space-y-3 max-w-md">
-        <input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Nombre"
-          className="w-full px-4 py-2 bg-neutral-800 rounded"
-          required
-        />
+      <div className="mb-8 grid gap-6 lg:grid-cols-[1fr_0.85fr]">
+        <div className="rounded-[1.5rem] border border-neutral-800 bg-neutral-950/90 p-6 shadow-xl shadow-black/10">
+          <h2 className="text-xl font-semibold text-white mb-4">Agregar categoría</h2>
+          <form onSubmit={createCategory} className="space-y-4">
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Nombre"
+              className="w-full rounded-2xl border border-neutral-800 bg-slate-900 px-4 py-3 text-white outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
+              required
+            />
 
-        <textarea
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="Descripción"
-          className="w-full px-4 py-2 bg-neutral-800 rounded"
-        />
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Descripción"
+              className="w-full rounded-2xl border border-neutral-800 bg-slate-900 px-4 py-3 text-white outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 min-h-[120px]"
+            />
 
-        <button className="w-full bg-white text-black py-2 rounded font-medium">
-          Crear categoría
-        </button>
-      </form>
+            <button className="w-full rounded-2xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-emerald-500/30 transition hover:bg-emerald-400">
+              Crear categoría
+            </button>
+          </form>
+        </div>
 
-      {/* Listado */}
-      <ul className="space-y-3">
+        <div className="rounded-[1.5rem] border border-neutral-800 bg-neutral-950/90 p-6 shadow-xl shadow-black/10">
+          <h2 className="text-xl font-semibold text-white mb-4">Resumen</h2>
+          <div className="space-y-3 text-sm text-neutral-300">
+            <p>Total de categorías: <span className="font-semibold text-white">{categories.length}</span></p>
+            <p>{showInactive ? "Se muestran todas las categorías, incluidas las inactivas." : "Solo se muestran categorías activas."}</p>
+          </div>
+        </div>
+      </div>
+
+      <ul className="grid gap-4">
         {categories
-          // ✅ FILTRO: ocultar inactivas por defecto
           .filter((cat) => showInactive || cat.isActive)
           .map((cat) => (
             <li
               key={cat._id}
-              className={`p-4 rounded border flex justify-between items-center ${cat.isActive
-                  ? "bg-neutral-900 border-neutral-800"
-                  : "bg-neutral-800 border-red-500 opacity-60"
-                }`}
+              className={`rounded-[1.5rem] border border-neutral-800 bg-slate-950/90 p-5 shadow-lg shadow-black/10 transition hover:-translate-y-0.5 hover:border-cyan-500 ${cat.isActive ? "" : "opacity-90"}`}
             >
-              <div>
-                <p className="font-semibold">{cat.name}</p>
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-lg font-semibold text-white">{cat.name}</p>
+                  {cat.description && (
+                    <p className="mt-1 text-sm text-neutral-400">{cat.description}</p>
+                  )}
+                </div>
 
-                {cat.description && (
-                  <p className="text-sm text-neutral-400">
-                    {cat.description}
-                  </p>
-                )}
-
-                {!cat.isActive && (
-                  <span className="text-xs text-red-400">
-                    Categoría inactiva
-                  </span>
-                )}
+                <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${cat.isActive ? "bg-emerald-500/15 text-emerald-200" : "bg-rose-500/15 text-rose-200"}`}>
+                  {cat.isActive ? "Activa" : "Inactiva"}
+                </span>
               </div>
 
-              <button
-                onClick={() => toggleCategory(cat._id)}
-                className={`px-4 py-2 rounded text-sm font-medium ${cat.isActive
-                    ? "bg-red-500 text-white"
-                    : "bg-green-500 text-black"
-                  }`}
-              >
-                {cat.isActive ? "Desactivar" : "Activar"}
-              </button>
+              <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                <span className="text-sm text-neutral-500">ID: {cat._id.slice(0, 8)}...</span>
+                <button
+                  onClick={() => toggleCategory(cat._id)}
+                  className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${cat.isActive ? "bg-rose-500 text-white hover:bg-rose-400" : "bg-emerald-500 text-slate-950 hover:bg-emerald-400"}`}
+                >
+                  {cat.isActive ? "Desactivar" : "Activar"}
+                </button>
+              </div>
             </li>
           ))}
       </ul>
-      {/* ⬆️ Scroll to top */}
+
       <ScrollToTop />
     </div>
   );

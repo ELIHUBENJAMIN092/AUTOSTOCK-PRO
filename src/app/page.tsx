@@ -11,11 +11,7 @@ export default function HomePage() {
       <Navbar />
 
       {/* HERO */}
-      <section className="bg-gradient-to-r from-neutral-950 via-neutral-900 to-neutral-950">
-        <div className="container px-4 mx-auto">
-          <Hero />
-        </div>
-      </section>
+      <Hero />
 
       {/* INVENTARIO */}
       <Inventory />

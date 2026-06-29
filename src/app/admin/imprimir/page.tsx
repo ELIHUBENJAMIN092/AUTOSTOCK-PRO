@@ -202,56 +202,87 @@ export default function PrintInventoryPage() {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-4 text-white space-y-8">
-      <h1 className="text-2xl font-bold">Imprimir Inventario</h1>
+    <div className="w-full max-w-screen-xl mx-auto px-4 md:px-6 py-6 text-white space-y-8">
+      <div className="rounded-[2rem] border border-sky-700/30 bg-gradient-to-r from-slate-950 via-sky-950 to-slate-900 p-6 shadow-xl shadow-sky-500/10">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="text-sm uppercase tracking-[0.3em] text-cyan-300">Panel de impresión</p>
+            <h1 className="text-3xl font-bold text-white">Imprimir Inventario</h1>
+            <p className="mt-2 max-w-3xl text-neutral-300">
+              Genera informes PDF rápidos del inventario general o por categoría para imprimir en Zebra y mantener el control de stock.
+            </p>
+          </div>
+          <div className="inline-flex items-center gap-2 rounded-3xl bg-white/10 px-4 py-3 text-sm text-neutral-200 border border-white/10">
+            <Printer size={20} />
+            Generación rápida de inventarios
+          </div>
+        </div>
+      </div>
 
-      <section className="bg-neutral-900 border border-neutral-800 rounded-xl p-6 space-y-4">
-        <button
-          onClick={() => generatePDF()}
-          disabled={loading}
-          className="w-full bg-white text-black py-3 rounded font-semibold flex items-center justify-center gap-2"
-        >
-          <Printer size={18} />
-          {loading ? "Generando PDF..." : "Generar PDF Inventario General"}
-        </button>
+      <section className="bg-neutral-900 border border-sky-700/20 rounded-3xl p-6 shadow-lg shadow-sky-500/10 space-y-6">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h2 className="text-xl font-semibold text-cyan-300">Generar PDF</h2>
+            <p className="text-sm text-neutral-400">Descarga un PDF completo del inventario o elige una categoría específica.</p>
+          </div>
+          <button
+            onClick={() => generatePDF()}
+            disabled={loading}
+            className="inline-flex items-center justify-center gap-2 rounded-3xl bg-cyan-500 px-6 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-cyan-500/20 transition hover:bg-cyan-400 disabled:opacity-60"
+          >
+            <Printer size={18} />
+            {loading ? "Generando PDF..." : "Inventario General"}
+          </button>
+        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <div className="grid gap-4 md:grid-cols-[1.8fr_1fr]">
           <select
             value={selectedCategory}
             onChange={(e) => setSelectedCategory(e.target.value)}
-            className="md:col-span-2 bg-white text-black rounded px-3 py-3"
+            className="w-full rounded-3xl border border-neutral-800 bg-slate-950 px-4 py-3 text-white outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20"
           >
             <option value="">Seleccione una categoría</option>
-
             {categories.map(([id, name]) => (
-              <option key={id} value={id}>
-                {name}
-              </option>
+              <option key={id} value={id}>{name}</option>
             ))}
           </select>
 
           <button
             onClick={() => generatePDF(selectedCategory)}
             disabled={loading || !selectedCategory}
-            className="bg-green-600 hover:bg-green-700 disabled:bg-neutral-600 text-white py-3 rounded font-semibold flex items-center justify-center gap-2"
+            className="w-full rounded-[1.75rem] bg-gradient-to-r from-emerald-500 via-emerald-400 to-teal-400 px-6 py-3 text-sm font-semibold uppercase tracking-[0.08em] text-slate-950 shadow-2xl shadow-emerald-500/25 ring-1 ring-emerald-300/20 transition duration-200 hover:from-emerald-400 hover:via-emerald-300 hover:to-teal-300 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            <Printer size={18} />
-            Por Categoría
+            {loading ? "Generando categoría..." : "Imprimir Categoría"}
           </button>
         </div>
       </section>
 
-      <section className="bg-neutral-900 border border-neutral-800 rounded-xl p-6">
-        <h2 className="font-semibold mb-3">Vista rápida</h2>
+      <section className="bg-neutral-900 border border-slate-700/40 rounded-3xl p-6 shadow-lg shadow-slate-950/20">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-xl font-semibold text-white">Vista rápida</h2>
+            <p className="text-sm text-neutral-400">Resumen de los primeros productos del catálogo para validar antes de imprimir.</p>
+          </div>
+          <span className="inline-flex items-center rounded-full bg-slate-800 px-4 py-2 text-sm text-cyan-300 border border-cyan-700/40">
+            {products.length} productos cargados
+          </span>
+        </div>
 
-        <div className="bg-white text-black p-3 rounded text-xs max-h-60 overflow-y-auto">
-          {products.slice(0, 8).map((p) => (
-            <div key={p._id} className="flex justify-between border-b py-1">
-              <span>{p.code}</span>
-              <span className="px-2">{p.name}</span>
-              <span>{p.stock}</span>
-            </div>
-          ))}
+        <div className="mt-4 overflow-hidden rounded-3xl border border-neutral-800 bg-slate-950 p-3 text-sm text-neutral-100">
+          <div className="grid grid-cols-[1.2fr_3fr_0.8fr] gap-4 border-b border-neutral-800 pb-3 text-xs uppercase tracking-[0.2em] text-neutral-500">
+            <span>Código</span>
+            <span>Producto</span>
+            <span className="text-right">Stock</span>
+          </div>
+          <div className="space-y-2 mt-3">
+            {products.slice(0, 8).map((p) => (
+              <div key={p._id} className="grid grid-cols-[1.2fr_3fr_0.8fr] gap-4 text-sm text-neutral-200">
+                <span>{p.code || "-"}</span>
+                <span className="truncate">{p.name}</span>
+                <span className="text-right text-emerald-300">{p.stock ?? 0}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 

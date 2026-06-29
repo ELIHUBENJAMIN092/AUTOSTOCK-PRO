@@ -148,24 +148,27 @@ export default function RFIDPage() {
   };
 
   return (
-    <div className="w-full overflow-x-hidden px-4 md:px-6 text-white max-w-4xl mx-auto space-y-10">
+    <div className="w-full overflow-x-hidden px-4 md:px-6 text-white max-w-screen-xl mx-auto space-y-10">
 
-      <h1 className="text-2xl font-bold">
-        Inventario RFID
-      </h1>
+      <div className="rounded-[2rem] border border-cyan-700/30 bg-gradient-to-r from-slate-950 via-cyan-950 to-slate-900 p-6 shadow-xl shadow-cyan-500/10">
+        <h1 className="text-3xl font-bold text-white">Inventario RFID</h1>
+        <p className="mt-3 max-w-3xl text-neutral-300">
+          Registra EPC por producto, carga lotes por línea y procesa archivos Zebra para mantener tu inventario RFID actualizado.
+        </p>
+      </div>
 
       {/* 🔎 BUSCAR EPC */}
       <SearchEPC />
 
       {/* REGISTRAR EPC */}
-      <section className="bg-neutral-900 border border-neutral-800 rounded-xl p-4 md:p-6 max-w-full">
-        <h2 className="text-lg font-semibold mb-4">
+      <section className="bg-neutral-900 border border-cyan-700/20 rounded-3xl p-4 md:p-6 shadow-lg shadow-cyan-500/10 max-w-full">
+        <h2 className="text-xl font-semibold text-cyan-300 mb-4">
           Registrar EPC
         </h2>
 
         <form
           onSubmit={handleSaveEPC}
-          className="flex flex-col gap-4 md:grid md:grid-cols-2"
+          className="grid gap-4 md:grid-cols-2"
         >
           <input
             value={epc}
@@ -192,7 +195,7 @@ export default function RFIDPage() {
           <button
             type="submit"
             disabled={saving}
-            className="md:col-span-2 bg-white text-black py-3 rounded font-semibold w-full"
+            className="md:col-span-2 w-full rounded-3xl bg-emerald-500 px-6 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-400 disabled:opacity-60"
           >
             {saving ? "Guardando..." : "Registrar EPC"}
           </button>
@@ -200,8 +203,8 @@ export default function RFIDPage() {
       </section>
 
       {/* ⭐⭐⭐ BATCH REGISTER UI */}
-      <section className="bg-neutral-900 border border-neutral-800 rounded-xl p-4 md:p-6">
-        <h2 className="text-lg font-semibold mb-4">
+      <section className="bg-neutral-900 border border-emerald-700/20 rounded-3xl p-4 md:p-6 shadow-lg shadow-emerald-500/10">
+        <h2 className="text-xl font-semibold text-emerald-300 mb-4">
           Registro Masivo EPC
         </h2>
 
@@ -217,7 +220,7 @@ export default function RFIDPage() {
           <button
             type="submit"
             disabled={batchSaving}
-            className="w-full bg-white text-black py-3 rounded font-semibold"
+            className="w-full rounded-3xl bg-cyan-500 px-6 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-cyan-500/20 transition hover:bg-cyan-400 disabled:opacity-60"
           >
             {batchSaving ? "Registrando..." : "Registrar Lote"}
           </button>
@@ -226,8 +229,8 @@ export default function RFIDPage() {
       </section>
 
       {/* SUBIR CSV */}
-      <section className="bg-neutral-900 border border-neutral-800 rounded-xl p-4 md:p-6 max-w-full">
-        <h2 className="text-lg font-semibold mb-4">
+      <section className="bg-neutral-900 border border-amber-700/20 rounded-3xl p-4 md:p-6 shadow-lg shadow-amber-500/10 max-w-full">
+        <h2 className="text-xl font-semibold text-amber-300 mb-4">
           Procesar archivo Zebra RFID
         </h2>
 
@@ -247,10 +250,10 @@ export default function RFIDPage() {
           {!file ? (
             <label
               htmlFor="rfidUpload"
-              className="w-full h-32 border-2 border-dashed border-neutral-600 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:bg-neutral-800 transition"
+              className="w-full h-32 rounded-3xl border border-neutral-700 border-dashed bg-neutral-900 flex flex-col items-center justify-center cursor-pointer transition hover:border-amber-400 hover:bg-neutral-800"
             >
-              <UploadCloud size={32} />
-              <span className="text-sm mt-2">
+              <UploadCloud size={32} className="text-amber-300" />
+              <span className="text-sm mt-2 text-neutral-200">
                 Seleccionar archivo CSV
               </span>
             </label>
@@ -271,13 +274,13 @@ export default function RFIDPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-white text-black py-3 rounded font-semibold"
+            className="w-full rounded-3xl bg-amber-500 px-6 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-amber-500/20 transition hover:bg-amber-400 disabled:opacity-60"
           >
-            {loading ? "Procesando..." : "Actualizar Inventario"}
+            {loading ? "Procesando..." : "Actualizar inventario"}
           </button>
 
           {success && (
-            <div className="flex items-center gap-2 text-green-400 font-semibold animate-pulse">
+            <div className="flex items-center gap-2 rounded-2xl bg-emerald-500/10 px-4 py-3 text-emerald-300 font-semibold animate-pulse">
               <CheckCircle size={22} />
               Inventario actualizado correctamente
             </div>
@@ -286,9 +289,9 @@ export default function RFIDPage() {
         </form>
 
         {result && (
-          <div className="mt-6 bg-neutral-800 p-4 rounded">
-            <p>✔ Actualizados: {result.updated}</p>
-            <p>⏱ Tiempo: {result.durationMs} ms</p>
+          <div className="mt-6 rounded-3xl border border-neutral-800 bg-neutral-900 p-4 shadow-inner shadow-black/20">
+            <p className="text-sm text-emerald-300">✔ Actualizados: <span className="font-semibold text-white">{result.updated}</span></p>
+            <p className="text-sm text-cyan-300">⏱ Tiempo: <span className="font-semibold text-white">{result.durationMs} ms</span></p>
 
             {result.notFound.length > 0 && (
               <>
@@ -296,7 +299,7 @@ export default function RFIDPage() {
                   EPC no registrados ({result.notFound.length})
                 </p>
 
-                <ul className="text-xs mt-1 space-y-1 break-all max-h-40 overflow-auto">
+                <ul className="text-xs mt-1 space-y-1 break-all max-h-40 overflow-auto text-neutral-300">
                   {result.notFound.map((e) => (
                     <li key={e}>{e}</li>
                   ))}
@@ -305,7 +308,6 @@ export default function RFIDPage() {
             )}
           </div>
         )}
-
       </section>
 
       <ScrollToTop />
