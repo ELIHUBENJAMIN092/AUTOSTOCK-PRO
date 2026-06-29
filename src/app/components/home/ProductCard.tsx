@@ -1,21 +1,13 @@
+import { Product } from '@/types'
+import Card from '@/app/components/ui/Card'
+
 interface ProductCardProps {
-  product: any
+  product: Product
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
   return (
-    <div
-      className="
-        bg-neutral-900
-        border border-neutral-800
-        rounded-2xl
-        overflow-hidden
-        hover:border-neutral-700
-        transition
-        shadow-sm
-        flex flex-col
-      "
-    >
+    <Card>
       {/* IMAGEN */}
       <div className="relative h-56 overflow-hidden bg-white flex items-center justify-center">
         <img
@@ -98,6 +90,6 @@ export default function ProductCard({ product }: ProductCardProps) {
 
         </div>
       </div>
-    </div>
+    </Card>
   )
 }

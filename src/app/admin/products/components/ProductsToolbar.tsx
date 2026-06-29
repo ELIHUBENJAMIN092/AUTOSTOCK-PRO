@@ -21,10 +21,10 @@ export default function ProductsToolbar({
         categories={categories}
         {...form}
       />
-
       <SearchBar
-        value={search}
-        onChange={setSearch}
+        initialValue={search}
+        onSearch={setSearch}
+        debounceMs={300}
         placeholder="Buscar por nombre o código..."
       />
     </div>

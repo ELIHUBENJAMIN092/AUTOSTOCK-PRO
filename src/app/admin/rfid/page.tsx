@@ -5,6 +5,7 @@ import ScrollToTop from "@/app/components/ScrollToTop";
 import toast from "react-hot-toast";
 import { UploadCloud, CheckCircle } from "lucide-react";
 import SearchEPC from "./components/SearchEPC";
+import Button from '@/app/components/ui/Button'
 
 type Product = {
   _id: string;
@@ -192,13 +193,7 @@ export default function RFIDPage() {
             ))}
           </select>
 
-          <button
-            type="submit"
-            disabled={saving}
-            className="md:col-span-2 w-full rounded-3xl bg-emerald-500 px-6 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-400 disabled:opacity-60"
-          >
-            {saving ? "Guardando..." : "Registrar EPC"}
-          </button>
+          <Button type="submit" disabled={saving} className="md:col-span-2 w-full rounded-3xl bg-emerald-500 px-6 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-400 disabled:opacity-60">{saving ? "Guardando..." : "Registrar EPC"}</Button>
         </form>
       </section>
 
@@ -217,13 +212,7 @@ export default function RFIDPage() {
             className="bg-neutral-800 w-full p-3 rounded h-40"
           />
 
-          <button
-            type="submit"
-            disabled={batchSaving}
-            className="w-full rounded-3xl bg-cyan-500 px-6 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-cyan-500/20 transition hover:bg-cyan-400 disabled:opacity-60"
-          >
-            {batchSaving ? "Registrando..." : "Registrar Lote"}
-          </button>
+          <Button type="submit" disabled={batchSaving} className="w-full rounded-3xl bg-cyan-500 px-6 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-cyan-500/20 transition hover:bg-cyan-400 disabled:opacity-60">{batchSaving ? "Registrando..." : "Registrar Lote"}</Button>
 
         </form>
       </section>
@@ -261,23 +250,11 @@ export default function RFIDPage() {
             <div className="bg-neutral-800 rounded p-3 flex flex-wrap gap-2 justify-between items-center">
               <span className="text-sm break-all">{file.name}</span>
 
-              <button
-                type="button"
-                onClick={() => setFile(null)}
-                className="text-xs bg-black/60 px-3 py-1 rounded"
-              >
-                Cambiar
-              </button>
+                  <Button type="button" onClick={() => setFile(null)} className="text-xs bg-black/60 px-3 py-1 rounded">Cambiar</Button>
             </div>
           )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-3xl bg-amber-500 px-6 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-amber-500/20 transition hover:bg-amber-400 disabled:opacity-60"
-          >
-            {loading ? "Procesando..." : "Actualizar inventario"}
-          </button>
+          <Button type="submit" disabled={loading} className="w-full rounded-3xl bg-amber-500 px-6 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-amber-500/20 transition hover:bg-amber-400 disabled:opacity-60">{loading ? "Procesando..." : "Actualizar inventario"}</Button>
 
           {success && (
             <div className="flex items-center gap-2 rounded-2xl bg-emerald-500/10 px-4 py-3 text-emerald-300 font-semibold animate-pulse">

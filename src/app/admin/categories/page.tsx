@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import ScrollToTop from "@/app/components/ScrollToTop";
+import Button from '@/app/components/ui/Button'
 
 
 type Category = {
@@ -63,15 +64,15 @@ export default function CategoriesPage() {
             </p>
           </div>
 
-          <button
-            onClick={() => setShowInactive(!showInactive)}
-            className={`inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold transition ${showInactive
-              ? "border border-emerald-400 bg-emerald-500/15 text-emerald-200"
-              : "border border-slate-700 bg-slate-900 text-slate-200 hover:border-emerald-400 hover:text-emerald-200"
-            }`}
-          >
-            {showInactive ? "Ocultar inactivas" : "Mostrar inactivas"}
-          </button>
+            <Button
+              onClick={() => setShowInactive(!showInactive)}
+              className={`inline-flex items-center rounded-full px-4 py-2 text-sm font-semibold transition ${showInactive
+                ? "border border-emerald-400 bg-emerald-500/15 text-emerald-200"
+                : "border border-slate-700 bg-slate-900 text-slate-200 hover:border-emerald-400 hover:text-emerald-200"
+              }`}
+            >
+              {showInactive ? "Ocultar inactivas" : "Mostrar inactivas"}
+            </Button>
         </div>
       </div>
 
@@ -94,9 +95,7 @@ export default function CategoriesPage() {
               className="w-full rounded-2xl border border-neutral-800 bg-slate-900 px-4 py-3 text-white outline-none transition focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/20 min-h-[120px]"
             />
 
-            <button className="w-full rounded-2xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-emerald-500/30 transition hover:bg-emerald-400">
-              Crear categoría
-            </button>
+            <Button className="w-full rounded-2xl bg-emerald-500 px-4 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-emerald-500/30 transition hover:bg-emerald-400">Crear categoría</Button>
           </form>
         </div>
 
@@ -132,12 +131,7 @@ export default function CategoriesPage() {
 
               <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
                 <span className="text-sm text-neutral-500">ID: {cat._id.slice(0, 8)}...</span>
-                <button
-                  onClick={() => toggleCategory(cat._id)}
-                  className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${cat.isActive ? "bg-rose-500 text-white hover:bg-rose-400" : "bg-emerald-500 text-slate-950 hover:bg-emerald-400"}`}
-                >
-                  {cat.isActive ? "Desactivar" : "Activar"}
-                </button>
+                <Button onClick={() => toggleCategory(cat._id)} className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${cat.isActive ? "bg-rose-500 text-white hover:bg-rose-400" : "bg-emerald-500 text-slate-950 hover:bg-emerald-400"}`}>{cat.isActive ? "Desactivar" : "Activar"}</Button>
               </div>
             </li>
           ))}

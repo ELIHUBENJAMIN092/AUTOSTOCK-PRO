@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import ScrollToTop from "@/app/components/ScrollToTop";
+import Button from '@/app/components/ui/Button'
 import toast from "react-hot-toast";
 import { Printer } from "lucide-react";
 
@@ -225,14 +226,7 @@ export default function PrintInventoryPage() {
             <h2 className="text-xl font-semibold text-cyan-300">Generar PDF</h2>
             <p className="text-sm text-neutral-400">Descarga un PDF completo del inventario o elige una categoría específica.</p>
           </div>
-          <button
-            onClick={() => generatePDF()}
-            disabled={loading}
-            className="inline-flex items-center justify-center gap-2 rounded-3xl bg-cyan-500 px-6 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-cyan-500/20 transition hover:bg-cyan-400 disabled:opacity-60"
-          >
-            <Printer size={18} />
-            {loading ? "Generando PDF..." : "Inventario General"}
-          </button>
+          <Button onClick={() => generatePDF()} disabled={loading} className="inline-flex items-center justify-center gap-2 rounded-3xl bg-cyan-500 px-6 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-cyan-500/20 transition hover:bg-cyan-400 disabled:opacity-60"><Printer size={18} />{loading ? "Generando PDF..." : "Inventario General"}</Button>
         </div>
 
         <div className="grid gap-4 md:grid-cols-[1.8fr_1fr]">
@@ -247,13 +241,7 @@ export default function PrintInventoryPage() {
             ))}
           </select>
 
-          <button
-            onClick={() => generatePDF(selectedCategory)}
-            disabled={loading || !selectedCategory}
-            className="w-full rounded-[1.75rem] bg-gradient-to-r from-emerald-500 via-emerald-400 to-teal-400 px-6 py-3 text-sm font-semibold uppercase tracking-[0.08em] text-slate-950 shadow-2xl shadow-emerald-500/25 ring-1 ring-emerald-300/20 transition duration-200 hover:from-emerald-400 hover:via-emerald-300 hover:to-teal-300 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {loading ? "Generando categoría..." : "Imprimir Categoría"}
-          </button>
+          <Button onClick={() => generatePDF(selectedCategory)} disabled={loading || !selectedCategory} className="w-full rounded-[1.75rem] bg-gradient-to-r from-emerald-500 via-emerald-400 to-teal-400 px-6 py-3 text-sm font-semibold uppercase tracking-[0.08em] text-slate-950 shadow-2xl shadow-emerald-500/25 ring-1 ring-emerald-300/20 transition duration-200 hover:from-emerald-400 hover:via-emerald-300 hover:to-teal-300 disabled:cursor-not-allowed disabled:opacity-60">{loading ? "Generando categoría..." : "Imprimir Categoría"}</Button>
         </div>
       </section>
 

@@ -7,7 +7,7 @@ export default function Footer() {
             <p className="text-sm uppercase tracking-[0.35em] text-cyan-300">COMPEL</p>
             <h2 className="text-3xl font-semibold text-white">Soluciones RFID y gestión de inventarios</h2>
             <p className="max-w-xl text-slate-400">
-              Diseño, implementación y soporte para negocios automotrices con control de stock inteligente y reportes en tiempo real.
+              Diseño, implementación y soporte para negocios con control de stock inteligente y reportes en tiempo real.
             </p>
           </div>
 

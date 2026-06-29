@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useProducts } from "./hooks/useProducts";
 
+import { ArrowRight } from "lucide-react";
 import ProductsTable from "./components/ProductsTable";
 import ProductsMobile from "./components/ProductsMobile";
 import EditProductModal from "./components/EditProductModal";
 import SearchBar from "@/app/components/home/SearchBar";
+import Button from '@/app/components/ui/Button'
 import ScrollToTop from "@/app/components/ScrollToTop";
 
 import Link from "next/link";
@@ -18,6 +20,10 @@ export default function ProductsPage() {
     categories,
     loading,
     savedRow,
+    total,
+    page,
+    limit,
+    setPage,
     updateStock,
     saveStock,
     refreshProducts,
@@ -26,19 +32,63 @@ export default function ProductsPage() {
   const [search, setSearch] = useState("");
   const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [saving, setSaving] = useState(false);
-  const [visibleCount, setVisibleCount] = useState(20);
+  const searchResetRef = useRef(false);
 
   useEffect(() => {
-    setVisibleCount(20);
-  }, [search]);
+    searchResetRef.current = true;
+    setPage(1);
+    refreshProducts(search, 1);
+  }, [search, refreshProducts, setPage]);
 
-  const filteredProducts = products.filter(
-    (p) =>
-      p.name.toLowerCase().includes(search.toLowerCase()) ||
-      (p.code ?? "").toLowerCase().includes(search.toLowerCase())
+  useEffect(() => {
+    if (searchResetRef.current) {
+      searchResetRef.current = false;
+      return;
+    }
+
+    refreshProducts(search, page);
+  }, [page, refreshProducts, search]);
+
+  const displayedProducts = products;
+
+  const pageCount = useMemo(
+    () => Math.max(1, Math.ceil(total / limit)),
+    [total, limit]
   );
 
-  const displayedProducts = filteredProducts.slice(0, visibleCount);
+  const pageNumbers = useMemo(() => {
+    const buttons: Array<number | string> = [];
+    const shown = 5;
+    const half = Math.floor(shown / 2);
+    let start = Math.max(1, page - half);
+    let end = Math.min(pageCount, page + half);
+
+    if (page <= half) {
+      start = 1;
+      end = Math.min(pageCount, shown);
+    }
+
+    if (page + half > pageCount) {
+      end = pageCount;
+      start = Math.max(1, pageCount - shown + 1);
+    }
+
+    if (start > 1) {
+      buttons.push(1);
+      if (start > 2) buttons.push("...");
+    }
+
+    for (let number = start; number <= end; number += 1) {
+      buttons.push(number);
+    }
+
+    if (end < pageCount) {
+      if (end < pageCount - 1) buttons.push("...");
+      buttons.push(pageCount);
+    }
+
+    return buttons;
+  }, [page, pageCount]);
 
   const saveEdit = async () => {
     if (!editProduct) return;
@@ -110,11 +160,16 @@ export default function ProductsPage() {
       </div>
 
       <div className="w-full">
-        <SearchBar
-          value={search}
-          onChange={setSearch}
-          placeholder="Buscar por nombre o código..."
-        />
+        <SearchBar initialValue={search} onSearch={setSearch} debounceMs={300} placeholder="Buscar por nombre, código o EPC..." />
+      </div>
+
+      <div className="flex flex-col gap-2 text-sm text-neutral-400">
+        <p>
+          Página <span className="font-semibold text-white">{page}</span> de <span className="font-semibold text-white">{pageCount}</span>
+        </p>
+        <p>
+          Total <span className="font-semibold text-white">{total}</span> productos
+        </p>
       </div>
 
       <div className="md:hidden w-full overflow-hidden">
@@ -139,17 +194,57 @@ export default function ProductsPage() {
         />
       </div>
 
-      {filteredProducts.length > visibleCount && (
-        <div className="flex flex-col items-center gap-3">
-          <p className="text-sm text-neutral-400">
-            Quedan {filteredProducts.length - visibleCount} productos por cargar.
+      {pageCount > 1 && (
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-neutral-800 bg-slate-950/50 px-4 py-4 text-sm text-neutral-300 shadow-lg shadow-cyan-500/10">
+          <p>
+            Mostrando página <span className="font-semibold text-white">{page}</span> de <span className="font-semibold text-white">{pageCount}</span>
           </p>
-          <button
-            onClick={() => setVisibleCount((current) => Math.min(current + 20, filteredProducts.length))}
-            className="rounded-2xl bg-cyan-500 px-6 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-cyan-500/20 transition hover:bg-cyan-400"
-          >
-            Ver más
-          </button>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              onClick={() => {
+                const prevPage = Math.max(1, page - 1);
+                setPage(prevPage);
+              }}
+              disabled={page === 1}
+              className="rounded-2xl px-4 py-2 text-sm font-semibold text-slate-950 shadow-lg shadow-cyan-500/20"
+            >
+              Anterior
+            </Button>
+
+            <div className="flex flex-wrap items-center gap-2">
+              {pageNumbers.map((pageNumber, index) =>
+                typeof pageNumber === "number" ? (
+                  <Button
+                    key={pageNumber}
+                    onClick={() => setPage(pageNumber)}
+                    disabled={pageNumber === page}
+                    className={`rounded-2xl px-4 py-2 text-sm font-semibold shadow-lg shadow-cyan-500/20 ${
+                      pageNumber === page ? "bg-cyan-500 text-slate-950" : "!bg-white !text-slate-950 hover:bg-slate-100"
+                    }`}
+                  >
+                    {pageNumber}
+                  </Button>
+                ) : (
+                  <span key={`ellipsis-${index}`} className="inline-flex h-10 items-center px-3 text-sm text-neutral-400">
+                    …
+                  </span>
+                )
+              )}
+            </div>
+
+            <Button
+              onClick={() => {
+                const nextPage = Math.min(pageCount, page + 1);
+                setPage(nextPage);
+              }}
+              disabled={page === pageCount}
+              className="inline-flex items-center gap-2 rounded-2xl px-4 py-2 text-sm font-semibold text-slate-950 shadow-lg shadow-cyan-500/20"
+            >
+              Siguiente
+              <ArrowRight className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
       )}
 

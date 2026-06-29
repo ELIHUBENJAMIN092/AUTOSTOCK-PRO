@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Minus, Plus, Save, Check, Pencil, Trash2 } from "lucide-react";
 import type { Product } from "../types";
@@ -36,8 +36,8 @@ export default function ProductActions({
 
   return (
     <div className="flex flex-wrap justify-end gap-2 w-full">
-      {/* ➖ Disminuir stock */}
       <button
+        type="button"
         onClick={() => onUpdateStock(product._id, -1)}
         className={`${baseBtn} ${grayBtn}`}
         title="Disminuir stock"
@@ -45,8 +45,8 @@ export default function ProductActions({
         <Minus className="w-4 h-4" />
       </button>
 
-      {/* ➕ Aumentar stock */}
       <button
+        type="button"
         onClick={() => onUpdateStock(product._id, 1)}
         className={`${baseBtn} ${grayBtn}`}
         title="Aumentar stock"
@@ -54,8 +54,8 @@ export default function ProductActions({
         <Plus className="w-4 h-4" />
       </button>
 
-      {/* 💾 Guardar */}
       <button
+        type="button"
         onClick={() => onSave(product)}
         className={`${baseBtn} ${isSaved ? greenBtn : grayBtn}`}
         title={isSaved ? "Guardado" : "Guardar"}
@@ -67,8 +67,8 @@ export default function ProductActions({
         )}
       </button>
 
-      {/* ✏️ Editar */}
       <button
+        type="button"
         onClick={() => onEdit(product)}
         className={`${baseBtn} ${grayBtn}`}
         title="Editar producto"
@@ -76,8 +76,8 @@ export default function ProductActions({
         <Pencil className="w-4 h-4" />
       </button>
 
-      {/* 🗑 Eliminar */}
       <button
+        type="button"
         onClick={() => onDelete(product)}
         className={`${baseBtn} ${redBtn}`}
         title="Eliminar producto"

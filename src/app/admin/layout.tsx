@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Button from '@/app/components/ui/Button'
+import IconButton from '@/app/components/ui/IconButton'
 
 export default function AdminLayout({
   children,
@@ -27,7 +29,7 @@ export default function AdminLayout({
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-slate-950 text-white font-montserrat">
+    <div className="min-h-screen flex flex-col md:flex-row bg-slate-950 text-white">
 
       {/* HEADER MOBILE */}
       <header className="md:hidden flex items-center justify-between px-5 py-4 border-b border-slate-800 bg-slate-950/90 backdrop-blur-sm shadow-sm shadow-slate-950/20">
@@ -36,13 +38,13 @@ export default function AdminLayout({
           <span className="font-bold text-lg">autostock pro</span>
         </div>
 
-        <button
+        <IconButton
           onClick={() => setMenuOpen(!menuOpen)}
-          className="rounded-full bg-slate-900/80 p-2 text-white shadow-lg shadow-cyan-500/10 transition hover:bg-cyan-500/90"
+          className="rounded-full bg-slate-900/80 text-white shadow-lg shadow-cyan-500/10"
           aria-label="Abrir menú"
         >
           ☰
-        </button>
+        </IconButton>
       </header>
 
       {/* SIDEBAR */}
@@ -56,16 +58,15 @@ export default function AdminLayout({
       >
         <div className="flex items-center justify-between mb-8">
           <div>
-            <span className="text-sm uppercase tracking-[0.3em] text-cyan-300">Admin</span>
           </div>
 
-          <button
+          <IconButton
             onClick={() => setMenuOpen(false)}
-            className="md:hidden rounded-full bg-slate-900/80 p-2 text-xl text-white shadow-lg shadow-slate-950/20"
+            className="md:hidden rounded-full bg-slate-900/80 text-xl text-white shadow-lg shadow-slate-950/20"
             aria-label="Cerrar menú"
           >
             ✕
-          </button>
+          </IconButton>
         </div>
 
         <div className="rounded-3xl bg-slate-900/80 border border-slate-800 p-4 mb-6 shadow-xl shadow-cyan-500/10">
@@ -115,12 +116,12 @@ export default function AdminLayout({
           </Link>
         </nav>
 
-        <button
+        <Button
           onClick={handleLogout}
           className="mt-auto w-full rounded-3xl bg-white px-4 py-3 text-sm font-semibold text-slate-950 shadow-2xl shadow-slate-900/15 transition hover:bg-slate-100"
         >
           Cerrar sesión
-        </button>
+        </Button>
       </aside>
 
       {/* CONTENIDO */}

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { Product } from "@/app/admin/products/types";
+import Button from '@/app/components/ui/Button'
 
 interface Props {
   products: Product[];
@@ -61,13 +62,7 @@ export default function RegisterEPC({ products }: Props) {
         className="w-full bg-neutral-800 px-4 py-2 rounded"
       />
 
-      <button
-        onClick={handleSave}
-        disabled={loading}
-        className="bg-white text-black px-6 py-2 rounded font-medium disabled:opacity-50"
-      >
-        {loading ? "Guardando..." : "Registrar EPC"}
-      </button>
+      <Button onClick={handleSave} disabled={loading} className="bg-white text-black px-6 py-2 rounded font-medium disabled:opacity-50">{loading ? "Guardando..." : "Registrar EPC"}</Button>
 
       {msg && <p className="text-sm text-neutral-300">{msg}</p>}
     </div>

@@ -1,65 +1,47 @@
-'use client'
+"use client"
 
 import { useEffect, useState } from 'react'
+import { Product } from '@/types'
 import ProductCard from './ProductCard'
 import SearchBar from './SearchBar'
+import Button from '@/app/components/ui/Button'
 import CategoryFilter from './CategoryFilter'
 
 export default function Inventory() {
-  const [products, setProducts] = useState<any[]>([])
+  const [products, setProducts] = useState<Product[]>([])
   const [search, setSearch] = useState('')
-  const [epcProduct, setEpcProduct] = useState<any | null>(null)
   const [category, setCategory] = useState('all')
   const [loading, setLoading] = useState(true)
-  const [showAll, setShowAll] = useState(false)
+  const [page, setPage] = useState(1)
+  const [limit] = useState(20)
+  const [total, setTotal] = useState(0)
+  const [loadingMore, setLoadingMore] = useState(false)
 
   useEffect(() => {
-    fetch('/api/products')
+    setLoading(true)
+    fetch(`/api/products?page=1&limit=${limit}`)
       .then(res => res.json())
-      .then(setProducts)
+      .then(({ products, total, page: p }: any) => {
+        setProducts(products || [])
+        setTotal(total || 0)
+        setPage(p || 1)
+      })
       .finally(() => setLoading(false))
-  }, [])
+  }, [limit])
 
   useEffect(() => {
-    const query = search.trim()
-
-    if (!query) {
-      setEpcProduct(null)
-      return
-    }
-
-    const controller = new AbortController()
-    let canceled = false
-
-    const lookupEpc = async () => {
-      try {
-        const res = await fetch(
-          `/api/rfid/search?epc=${encodeURIComponent(query)}`,
-          { signal: controller.signal }
-        )
-
-        if (!res.ok) {
-          if (!canceled) setEpcProduct(null)
-          return
-        }
-
-        const tag = await res.json()
-
-        if (!canceled) {
-          setEpcProduct(tag?.product ?? null)
-        }
-      } catch {
-        if (!canceled) setEpcProduct(null)
-      }
-    }
-
-    lookupEpc()
-
-    return () => {
-      canceled = true
-      controller.abort()
-    }
-  }, [search])
+    // Server-side search: query by name, code or EPC (handled by API)
+    const q = search
+    setLoading(true)
+    fetch(`/api/products?page=1&limit=${limit}${q ? `&q=${encodeURIComponent(q)}` : ''}${category !== 'all' ? `&category=${encodeURIComponent(category)}` : ''}`)
+      .then(res => res.json())
+      .then(({ products, total, page: p }: any) => {
+        setProducts(products || [])
+        setTotal(total || 0)
+        setPage(p || 1)
+      })
+      .finally(() => setLoading(false))
+  }, [search, category, limit])
 
   const categories = Array.from(
     new Set(
@@ -69,24 +51,8 @@ export default function Inventory() {
     )
   )
 
-  const filteredByText = products.filter(p => {
-    const searchTerm = search.toLowerCase()
-
-    const matchSearch =
-      p.name.toLowerCase().includes(searchTerm) ||
-      (p.code ?? '').toLowerCase().includes(searchTerm)
-
-    const matchCategory =
-      category === 'all' || p.category?.name === category
-
-    return matchSearch && matchCategory
-  })
-
-  const filtered = search.trim() && epcProduct
-    ? [epcProduct, ...filteredByText.filter(p => p._id !== epcProduct._id)]
-    : filteredByText
-
-  const visibleProducts = showAll ? filtered : filtered.slice(0, 20)
+  const filtered = products.filter(p => category === 'all' || p.category?.name === category)
+  const visibleProducts = filtered
 
   return (
     <section
@@ -100,8 +66,9 @@ export default function Inventory() {
         </h2>
 
         <SearchBar
-          value={search}
-          onChange={setSearch}
+          initialValue={search}
+          onSearch={setSearch}
+          debounceMs={300}
           placeholder="Buscar por nombre, número de parte o EPC..."
         />
 
@@ -127,15 +94,33 @@ export default function Inventory() {
               ))}
             </div>
 
-            {filtered.length > 20 && (
+            {products.length < total ? (
               <div className="flex justify-center mt-10">
-                <button
-                  onClick={() => setShowAll(!showAll)}
-                  className="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-sky-500 text-slate-950 font-semibold shadow-xl shadow-cyan-500/20 transition hover:opacity-95"
+                <Button
+                  onClick={async () => {
+                    setLoadingMore(true)
+                    try {
+                      const next = page + 1
+                      const res = await fetch(`/api/products?page=${next}&limit=${limit}${search ? `&q=${encodeURIComponent(search)}` : ''}${category !== 'all' ? `&category=${encodeURIComponent(category)}` : ''}`)
+                      const body = await res.json()
+                      setProducts(prev => [...prev, ...(body.products || [])])
+                      setPage(body.page || next)
+                      setTotal(body.total || total)
+                    } finally {
+                      setLoadingMore(false)
+                    }
+                  }}
+                  disabled={loadingMore}
                 >
-                  {showAll ? "Ver menos" : "Ver más productos"}
-                </button>
+                  {loadingMore ? "Cargando..." : "Ver más productos"}
+                </Button>
               </div>
+            ) : (
+              total > 0 && (
+                <div className="flex justify-center mt-10 text-neutral-400">
+                  No hay más productos
+                </div>
+              )
             )}
           </>
         )}

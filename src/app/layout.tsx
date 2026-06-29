@@ -1,18 +1,10 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "react-hot-toast";
 import Providers from "./providers";   // ⭐ IMPORTANTE
+import { montserrat } from "./fonts";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const font = montserrat;
 
 export const metadata: Metadata = {
   title: "Inventario CP",
@@ -28,7 +20,7 @@ export default function RootLayout({
     <html lang="es" suppressHydrationWarning>
       <body
         suppressHydrationWarning
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white text-neutral-900`}
+        className={`${font.variable} antialiased bg-white text-neutral-900`}
       >
 
         {/* ✅ ENVOLTORIO CLIENT SAFE */}

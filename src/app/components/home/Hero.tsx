@@ -13,7 +13,7 @@ export default function Hero() {
             </h1>
 
             <p className="text-slate-300 text-base sm:text-lg max-w-xl mx-auto lg:mx-0 mb-10">
-              Gestiona tu inventario automotriz en tiempo real con información precisa, control de stock y acceso seguro para administradores.
+              Gestiona tu inventario en tiempo real con información precisa, control de stock y acceso seguro para administradores.
             </p>
 
             <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-4">
@@ -38,7 +38,7 @@ export default function Hero() {
               <div className="absolute -inset-4 rounded-[2rem] bg-gradient-to-br from-cyan-500/10 via-slate-900 to-violet-500/10 blur-3xl" />
 
               <div className="relative overflow-hidden rounded-[2rem] border border-slate-800 bg-slate-900/95 p-6 sm:p-8 lg:p-10 shadow-2xl shadow-slate-950/40">
-                <div className="mb-6 rounded-[1.75rem] bg-slate-950/90 p-4 sm:p-6 shadow-2xl shadow-cyan-500/10">
+                <div className="mb-6 rounded-[1.75rem] bg-white p-4 sm:p-6 shadow-2xl shadow-cyan-500/10">
                   <img
                     src="/images/tc22r.png"
                     alt="Zebra TC22R RFID"

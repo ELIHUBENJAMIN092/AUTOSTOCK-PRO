@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { Trash2 } from "lucide-react";
+import IconButton from '@/app/components/ui/IconButton'
+import Button from '@/app/components/ui/Button'
 import toast from "react-hot-toast";
 
 type Category =
@@ -112,25 +114,20 @@ export default function SearchEPCModule() {
         />
 
         {search && (
-          <button
+          <IconButton
             onClick={() => {
               setSearch("");
               setResult(null);
             }}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-white/60 hover:text-white"
+            title="Limpiar"
           >
             ✕
-          </button>
+          </IconButton>
         )}
       </div>
 
-      <button
-        onClick={handleSearch}
-        disabled={loading}
-        className="w-full bg-white text-black py-3 rounded font-semibold mb-4"
-      >
-        {loading ? "Buscando..." : "Buscar EPC"}
-      </button>
+      <Button onClick={handleSearch} disabled={loading} className="w-full bg-white text-black py-3 rounded font-semibold mb-4">{loading ? "Buscando..." : "Buscar EPC"}</Button>
 
       {result && (
         <div className="space-y-5">
@@ -146,13 +143,13 @@ export default function SearchEPCModule() {
               </p>
             </div>
 
-            <button
+            <IconButton
               onClick={handleDelete}
               className="text-red-500 hover:text-red-400 transition"
               title="Eliminar EPC"
             >
               <Trash2 size={22} />
-            </button>
+            </IconButton>
           </div>
 
           {product && (

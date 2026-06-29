@@ -4,11 +4,10 @@ import { useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { ImageIcon } from "lucide-react";
+import Button from '@/app/components/ui/Button'
+import IconButton from '@/app/components/ui/IconButton'
 
-interface Category {
-  _id: string;
-  name: string;
-}
+import { Category } from '@/types'
 
 interface Props {
   categories: Category[];
@@ -207,24 +206,25 @@ export default function ProductForm({ categories, onCreated }: Props) {
                   alt="Previsualización"
                   className="h-full w-full object-cover"
                 />
-                <button
+                <IconButton
                   type="button"
                   onClick={() => setImage(null)}
-                  className="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-full bg-black/70 text-white transition hover:bg-black"
+                  className="absolute right-3 top-3 h-8 w-8 items-center justify-center rounded-full bg-black/70 text-white transition hover:bg-black"
+                  title="Quitar imagen"
                 >
                   ✕
-                </button>
+                </IconButton>
               </div>
             )}
           </div>
 
-          <button
+          <Button
             type="submit"
             disabled={loading}
             className="w-full rounded-3xl bg-emerald-500 px-6 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-400 disabled:opacity-60"
           >
             {loading ? "Guardando..." : "Agregar producto"}
-          </button>
+          </Button>
         </div>
       </form>
     </div>

@@ -1,6 +1,8 @@
 "use client";
 
 import type { Product, Category } from "../types";
+import Button from '@/app/components/ui/Button'
+import IconButton from '@/app/components/ui/IconButton'
 
 interface Props {
   product: Product;
@@ -104,9 +106,9 @@ export default function EditProductModal({
         </select>
 
         {/* 🔘 RFID SWITCH */}
-        <div className="flex items-center justify-between bg-neutral-800 px-4 py-3 rounded">
+        <div className="flex items-center justify-between bg-neutral-800 px-4 py-3 rounded-xl shadow-inner shadow-black/20">
           <div>
-            <p className="font-medium">Control RFID</p>
+            <p className="font-medium text-white">Control RFID</p>
             <p className="text-xs text-neutral-400">
               Activar actualización automática de stock
             </p>
@@ -114,16 +116,15 @@ export default function EditProductModal({
 
           <button
             type="button"
-            onClick={() =>
-              onChange({ ...product, isRFID: !isRFID })
-            }
-            className={`w-14 h-7 flex items-center rounded-full transition ${
-              isRFID ? "bg-green-500" : "bg-neutral-600"
+            onClick={() => onChange({ ...product, isRFID: !isRFID })}
+            className={`relative inline-flex h-10 w-24 items-center rounded-full transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-cyan-400 ${
+              isRFID ? "bg-emerald-500" : "bg-neutral-700 hover:bg-neutral-600"
             }`}
+            title={isRFID ? "Desactivar RFID" : "Activar RFID"}
           >
             <span
-              className={`h-6 w-6 bg-white rounded-full transform transition ${
-                isRFID ? "translate-x-7" : "translate-x-1"
+              className={`absolute left-1 top-1 h-8 w-8 rounded-full bg-white shadow-md transition-transform duration-300 ${
+                isRFID ? "translate-x-12" : "translate-x-0"
               }`}
             />
           </button>
@@ -131,20 +132,9 @@ export default function EditProductModal({
 
         {/* Acciones */}
         <div className="flex gap-3 pt-4">
-          <button
-            onClick={onClose}
-            className="flex-1 bg-neutral-700 py-2 rounded"
-          >
-            Cancelar
-          </button>
+            <Button onClick={onClose} className="flex-1 bg-neutral-700 py-2 rounded">Cancelar</Button>
 
-          <button
-            onClick={onSave}
-            disabled={saving}
-            className="flex-1 bg-white text-black py-2 rounded font-semibold"
-          >
-            {saving ? "Guardando..." : "Guardar"}
-          </button>
+            <Button onClick={onSave} disabled={saving} className="flex-1 bg-white text-black py-2 rounded font-semibold">{saving ? "Guardando..." : "Guardar"}</Button>
         </div>
       </div>
     </div>

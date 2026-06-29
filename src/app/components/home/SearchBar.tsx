@@ -1,16 +1,26 @@
 'use client'
 
 interface SearchBarProps {
-  value: string
-  onChange: (value: string) => void
+  initialValue?: string
+  onSearch: (value: string) => void
+  debounceMs?: number
   placeholder?: string
 }
 
 export default function SearchBar({
-  value,
-  onChange,
+  initialValue = '',
+  onSearch,
+  debounceMs = 300,
   placeholder = 'Buscar por nombre, número de parte o EPC...'
 }: SearchBarProps) {
+  const [value, setValue] = (globalThis as any).React?.useState?.(initialValue) ?? require('react').useState(initialValue)
+
+  // debounce
+  require('react').useEffect(() => {
+    const t = setTimeout(() => onSearch(value.trim()), debounceMs)
+    return () => clearTimeout(t)
+  }, [value, debounceMs, onSearch])
+
   return (
     <div className="w-full mb-6 relative">
       {/* Icono búsqueda */}
@@ -34,7 +44,7 @@ export default function SearchBar({
       {/* Input */}
       <input
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => setValue(e.target.value)}
         placeholder={placeholder}
         className="w-full pl-12 pr-10 py-3 rounded-lg
           bg-neutral-800 border border-neutral-700 text-white
@@ -44,7 +54,7 @@ export default function SearchBar({
       {/* Botón borrar */}
       {value && (
         <button
-          onClick={() => onChange('')}
+          onClick={() => setValue('')}
           className="absolute right-3 top-1/2 -translate-y-1/2
             text-white/70 hover:text-white"
         >

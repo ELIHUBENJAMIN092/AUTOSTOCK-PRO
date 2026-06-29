@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Product, Category } from "../types";
 
 export function useProducts() {
@@ -8,11 +8,31 @@ export function useProducts() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [savedRow, setSavedRow] = useState<string | null>(null);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [limit] = useState(20);
+  const pageRef = useRef(page);
 
-  const fetchProducts = async () => {
-    const res = await fetch("/api/products");
-    setProducts(await res.json());
-  };
+  useEffect(() => {
+    pageRef.current = page;
+  }, [page]);
+
+  const fetchProducts = useCallback(async (query = "", pageNumber = pageRef.current) => {
+    const params = new URLSearchParams();
+
+    if (query) {
+      params.set("q", query);
+    }
+
+    params.set("page", String(pageNumber));
+    params.set("limit", String(limit));
+
+    const res = await fetch(`/api/products?${params.toString()}`);
+    const data = await res.json();
+
+    setProducts(Array.isArray(data) ? data : data?.products ?? []);
+    setTotal(typeof data?.total === "number" ? data.total : 0);
+  }, [limit]);
 
   const fetchCategories = async () => {
     const res = await fetch("/api/categories");
@@ -21,33 +41,51 @@ export function useProducts() {
   };
 
   useEffect(() => {
-    Promise.all([fetchProducts(), fetchCategories()])
-      .finally(() => setLoading(false));
+    setLoading(true);
+    fetchProducts().finally(() => setLoading(false));
+  }, [fetchProducts]);
+
+  useEffect(() => {
+    fetchCategories();
   }, []);
 
   /* 🔢 Stock UI */
   const updateStock = (id: string, delta: number) => {
-    setProducts(prev =>
-      prev.map(p =>
-        p._id === id
-          ? { ...p, stock: Math.max(0, (p.stock ?? 0) + delta) }
-          : p
-      )
+    setProducts((prev) =>
+      prev.map((p) => {
+        if (String(p._id) !== String(id)) {
+          return p;
+        }
+
+        const currentStock = Number(p.stock ?? 0);
+        return {
+          ...p,
+          stock: Math.max(0, currentStock + delta),
+        };
+      })
     );
   };
 
   /* 💾 Guardar stock */
   const saveStock = async (product: Product) => {
-    await fetch(`/api/products/${product._id}`, {
+    const stockValue = Number(product.stock ?? 0);
+
+    const response = await fetch(`/api/products/${product._id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ stock: product.stock }),
+      body: JSON.stringify({ stock: stockValue }),
     });
+
+    if (!response.ok) {
+      const errorPayload = await response.json().catch(() => null);
+      console.error("Error guardando stock:", errorPayload || response.statusText);
+      return;
+    }
 
     setSavedRow(product._id);
     setTimeout(() => setSavedRow(null), 2000);
 
-    fetchProducts();
+    await fetchProducts();
   };
 
   return {
@@ -55,6 +93,10 @@ export function useProducts() {
     categories,
     loading,
     savedRow,
+    total,
+    page,
+    limit,
+    setPage,
     updateStock,
     saveStock,
 
