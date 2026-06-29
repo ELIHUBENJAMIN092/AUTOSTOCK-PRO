@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from 'react'
-import { Product } from '@/types'
+import { Product, Category } from '@/types'
 import ProductCard from './ProductCard'
 import SearchBar from './SearchBar'
 import Button from '@/app/components/ui/Button'
@@ -11,11 +11,35 @@ export default function Inventory() {
   const [products, setProducts] = useState<Product[]>([])
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('all')
+  const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)
   const [limit] = useState(20)
   const [total, setTotal] = useState(0)
   const [loadingMore, setLoadingMore] = useState(false)
+
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const res = await fetch('/api/categories')
+        const data = await res.json()
+        if (Array.isArray(data)) {
+          setCategories(
+            data
+              .filter((c: any) => c?.isActive)
+              .map((c: any) => ({
+                _id: c._id,
+                name: c.name,
+              }))
+          )
+        }
+      } catch (error) {
+        console.error('Error cargando categorías:', error)
+      }
+    }
+
+    loadCategories()
+  }, [])
 
   useEffect(() => {
     setLoading(true)
@@ -43,21 +67,10 @@ export default function Inventory() {
       .finally(() => setLoading(false))
   }, [search, category, limit])
 
-  const categories = Array.from(
-    new Set(
-      products
-        .map(p => {
-          if (!p.category) return null
-          return typeof p.category === 'string' ? p.category : p.category.name
-        })
-        .filter(Boolean)
-    )
-  )
-
   const filtered = products.filter(p => {
     if (category === 'all') return true
     if (!p.category) return false
-    return typeof p.category === 'string' ? p.category === category : p.category.name === category
+    return typeof p.category === 'string' ? p.category === category : p.category._id === category
   })
   const visibleProducts = filtered
 
