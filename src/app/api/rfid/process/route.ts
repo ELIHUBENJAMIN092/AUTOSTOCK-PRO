@@ -13,10 +13,18 @@ export async function POST(req: Request) {
 
     const formData = await req.formData();
     const file = formData.get("file") as File | null;
+    const selectedProductId = formData.get("selectedProductId") as string | null;
 
     if (!file) {
       return NextResponse.json(
         { error: "Archivo CSV no enviado" },
+        { status: 400 }
+      );
+    }
+
+    if (!selectedProductId) {
+      return NextResponse.json(
+        { error: "Debe seleccionar un producto RFID para actualizar" },
         { status: 400 }
       );
     }
@@ -81,33 +89,35 @@ export async function POST(req: Request) {
     }
 
     // =========================
-    // 🔥 CLAVE DEL FIX
-    // Obtener TODOS los productos RFID
+    // Actualizar solo el producto seleccionado
     // =========================
-    const rfidProducts = await Product.find({
+    const rfidProduct = await Product.findOne({
+      _id: selectedProductId,
       isRFID: true,
       isActive: true,
     }).select("_id");
 
-    let updated = 0;
-
-    for (const product of rfidProducts) {
-      const pid = product._id.toString();
-
-      const newStock = productStock[pid] || 0;
-
-      await Product.findByIdAndUpdate(pid, {
-        $set: {
-          stock: newStock,
-          updatedAt: new Date(),
-        },
-      });
-
-      updated++;
+    if (!rfidProduct) {
+      return NextResponse.json(
+        { error: "Producto no encontrado o no tiene RFID activo" },
+        { status: 404 }
+      );
     }
 
+    const pid = rfidProduct._id.toString();
+    const newStock = productStock[pid] || 0;
+
+    await Product.findByIdAndUpdate(pid, {
+      $set: {
+        stock: newStock,
+        updatedAt: new Date(),
+      },
+    });
+
     return NextResponse.json({
-      updated,
+      updated: 1,
+      productId: pid,
+      newStock,
       notFound,
       durationMs: Date.now() - start,
     });

@@ -15,6 +15,7 @@ type Product = {
 
 type RFIDResult = {
   updated: number;
+  newStock: number;
   notFound: string[];
   durationMs: number;
 };
@@ -29,6 +30,7 @@ export default function RFIDPage() {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<RFIDResult | null>(null);
+  const [selectedRFIDProduct, setSelectedRFIDProduct] = useState("");
 
   const [success, setSuccess] = useState(false);
 
@@ -122,18 +124,22 @@ export default function RFIDPage() {
 
       const formData = new FormData();
       formData.append("file", file);
+      formData.append("selectedProductId", selectedRFIDProduct);
 
       const res = await fetch("/api/rfid/process", {
         method: "POST",
         body: formData,
       });
 
-      if (!res.ok) throw new Error();
-
       const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Error procesando archivo");
+      }
 
       setResult({
         updated: data.updated ?? 0,
+        newStock: data.newStock ?? 0,
         durationMs: data.durationMs ?? 0,
         notFound: Array.isArray(data.notFound) ? data.notFound : [],
       });
@@ -141,8 +147,8 @@ export default function RFIDPage() {
       setSuccess(true);
       toast.success("Inventario actualizado");
 
-    } catch {
-      toast.error("Error procesando archivo");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Error procesando archivo");
     } finally {
       setLoading(false);
     }
@@ -225,6 +231,29 @@ export default function RFIDPage() {
 
         <form onSubmit={handleUpload} className="space-y-5">
 
+          {/* Producto a actualizar */}
+          <div>
+            <label className="text-sm text-neutral-400 mb-2 block">
+              Producto a actualizar
+            </label>
+            <select
+              value={selectedRFIDProduct}
+              onChange={(e) => setSelectedRFIDProduct(e.target.value)}
+              className="bg-neutral-800 px-4 py-2.5 rounded-lg w-full border border-neutral-700 text-white"
+              required
+            >
+              <option value="">Selecciona producto RFID</option>
+              {products.map((p) => (
+                <option key={p._id} value={p._id}>
+                  {p.name} {p.code && `(${p.code})`}
+                </option>
+              ))}
+            </select>
+            <p className="text-xs text-neutral-500 mt-1.5">
+              Solo se actualizará el stock de este producto
+            </p>
+          </div>
+
           <input
             type="file"
             id="rfidUpload"
@@ -267,7 +296,8 @@ export default function RFIDPage() {
 
         {result && (
           <div className="mt-6 rounded-3xl border border-neutral-800 bg-neutral-900 p-4 shadow-inner shadow-black/20">
-            <p className="text-sm text-emerald-300">✔ Actualizados: <span className="font-semibold text-white">{result.updated}</span></p>
+            <p className="text-sm text-emerald-300">✔ Producto actualizado: <span className="font-semibold text-white">{result.updated}</span></p>
+            <p className="text-sm text-amber-300">📦 Nuevo stock: <span className="font-semibold text-white">{result.newStock}</span></p>
             <p className="text-sm text-cyan-300">⏱ Tiempo: <span className="font-semibold text-white">{result.durationMs} ms</span></p>
 
             {result.notFound.length > 0 && (
