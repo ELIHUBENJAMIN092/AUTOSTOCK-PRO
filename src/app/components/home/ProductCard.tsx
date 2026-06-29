@@ -22,16 +22,16 @@ export default function ProductCard({ product }: ProductCardProps) {
         {/* ESTADO */}
         <span
           className={`absolute top-3 right-3 px-3 py-1 text-xs font-semibold rounded-full ${
-            product.stock > 10
+            (product.stock ?? 0) > 10
               ? 'bg-green-600 text-white'
-              : product.stock > 0
+              : (product.stock ?? 0) > 0
               ? 'bg-yellow-500 text-black'
               : 'bg-red-600 text-white'
           }`}
         >
-          {product.stock > 10
+          {(product.stock ?? 0) > 10
             ? 'En Stock'
-            : product.stock > 0
+            : (product.stock ?? 0) > 0
             ? 'Stock Bajo'
             : 'Sin Stock'}
         </span>
