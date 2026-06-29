@@ -17,14 +17,14 @@ export default function ProductCard({ product }: ProductCardProps) {
       "
     >
       {/* IMAGEN */}
-      <div className="relative aspect-square">
+      <div className="relative h-56 overflow-hidden bg-white flex items-center justify-center">
         <img
           src={
             product.image ||
             'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=400'
           }
           alt={product.name}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-contain object-center"
         />
 
         {/* ESTADO */}

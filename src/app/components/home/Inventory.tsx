@@ -8,6 +8,7 @@ import CategoryFilter from './CategoryFilter'
 export default function Inventory() {
   const [products, setProducts] = useState<any[]>([])
   const [search, setSearch] = useState('')
+  const [epcProduct, setEpcProduct] = useState<any | null>(null)
   const [category, setCategory] = useState('all')
   const [loading, setLoading] = useState(true)
   const [showAll, setShowAll] = useState(false)
@@ -19,6 +20,47 @@ export default function Inventory() {
       .finally(() => setLoading(false))
   }, [])
 
+  useEffect(() => {
+    const query = search.trim()
+
+    if (!query) {
+      setEpcProduct(null)
+      return
+    }
+
+    const controller = new AbortController()
+    let canceled = false
+
+    const lookupEpc = async () => {
+      try {
+        const res = await fetch(
+          `/api/rfid/search?epc=${encodeURIComponent(query)}`,
+          { signal: controller.signal }
+        )
+
+        if (!res.ok) {
+          if (!canceled) setEpcProduct(null)
+          return
+        }
+
+        const tag = await res.json()
+
+        if (!canceled) {
+          setEpcProduct(tag?.product ?? null)
+        }
+      } catch {
+        if (!canceled) setEpcProduct(null)
+      }
+    }
+
+    lookupEpc()
+
+    return () => {
+      canceled = true
+      controller.abort()
+    }
+  }, [search])
+
   const categories = Array.from(
     new Set(
       products
@@ -27,16 +69,22 @@ export default function Inventory() {
     )
   )
 
-  const filtered = products.filter(p => {
+  const filteredByText = products.filter(p => {
+    const searchTerm = search.toLowerCase()
+
     const matchSearch =
-      p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.code.toLowerCase().includes(search.toLowerCase())
+      p.name.toLowerCase().includes(searchTerm) ||
+      (p.code ?? '').toLowerCase().includes(searchTerm)
 
     const matchCategory =
       category === 'all' || p.category?.name === category
 
     return matchSearch && matchCategory
   })
+
+  const filtered = search.trim() && epcProduct
+    ? [epcProduct, ...filteredByText.filter(p => p._id !== epcProduct._id)]
+    : filteredByText
 
   const visibleProducts = showAll ? filtered : filtered.slice(0, 20)
 
@@ -55,7 +103,7 @@ export default function Inventory() {
         <SearchBar
           value={search}
           onChange={setSearch}
-          placeholder="Buscar por nombre o número de parte..."
+          placeholder="Buscar por nombre, número de parte o EPC..."
         />
 
         <CategoryFilter

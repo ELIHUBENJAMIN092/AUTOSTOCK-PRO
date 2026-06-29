@@ -46,7 +46,7 @@ export default function Navbar() {
             </li>
 
             <li>
-              <Link href="#contacto" className="hover:text-white transition">
+              <Link href="/contact" className="hover:text-white transition">
                 Contacto
               </Link>
             </li>
@@ -73,7 +73,7 @@ export default function Navbar() {
               Categorías
             </Link>
 
-            <Link href="#contacto" onClick={() => setMobileNavOpen(false)} className="hover:text-white transition">
+            <Link href="/contact" onClick={() => setMobileNavOpen(false)} className="hover:text-white transition">
               Contacto
             </Link>
 

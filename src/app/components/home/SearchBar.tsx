@@ -9,7 +9,7 @@ interface SearchBarProps {
 export default function SearchBar({
   value,
   onChange,
-  placeholder = 'Buscar...'
+  placeholder = 'Buscar por nombre, número de parte o EPC...'
 }: SearchBarProps) {
   return (
     <div className="max-w-3xl mx-auto mb-6 relative">
