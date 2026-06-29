@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import ScrollToTop from "@/app/components/ScrollToTop";
 import toast from "react-hot-toast";
 import { UploadCloud, CheckCircle } from "lucide-react";
@@ -31,6 +31,20 @@ export default function RFIDPage() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<RFIDResult | null>(null);
   const [selectedRFIDProduct, setSelectedRFIDProduct] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showResults, setShowResults] = useState(false);
+  const [selectedRFIDProductName, setSelectedRFIDProductName] = useState("");
+  const searchRef = useRef<HTMLDivElement>(null);
+
+  const filteredProducts = useMemo(
+    () =>
+      products.filter(
+        (p) =>
+          p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (p.code || "").toLowerCase().includes(searchQuery.toLowerCase())
+      ),
+    [products, searchQuery]
+  );
 
   const [success, setSuccess] = useState(false);
 
@@ -41,7 +55,7 @@ export default function RFIDPage() {
   useEffect(() => {
     fetch("/api/products?rfid=true")
       .then((res) => res.json())
-      .then((data) => setProducts(Array.isArray(data) ? data : []))
+      .then((data) => setProducts(Array.isArray(data.products) ? data.products : []))
       .catch(() => setProducts([]));
   }, []);
 
@@ -116,6 +130,10 @@ export default function RFIDPage() {
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) return;
+    if (!selectedRFIDProduct) {
+      toast.error("Debe buscar y seleccionar un producto");
+      return;
+    }
 
     try {
       setLoading(true);
@@ -236,19 +254,68 @@ export default function RFIDPage() {
             <label className="text-sm text-neutral-400 mb-2 block">
               Producto a actualizar
             </label>
-            <select
-              value={selectedRFIDProduct}
-              onChange={(e) => setSelectedRFIDProduct(e.target.value)}
-              className="bg-neutral-800 px-4 py-2.5 rounded-lg w-full border border-neutral-700 text-white"
-              required
-            >
-              <option value="">Selecciona producto RFID</option>
-              {products.map((p) => (
-                <option key={p._id} value={p._id}>
-                  {p.name} {p.code && `(${p.code})`}
-                </option>
-              ))}
-            </select>
+            {selectedRFIDProduct && selectedRFIDProductName ? (
+              <div className="bg-neutral-800 px-4 py-2.5 rounded-lg w-full border border-neutral-700 flex justify-between items-center">
+                <span className="text-white">{selectedRFIDProductName}</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedRFIDProduct("");
+                    setSelectedRFIDProductName("");
+                    setSearchQuery("");
+                  }}
+                  className="text-xs text-amber-400 hover:text-amber-300"
+                >
+                  Cambiar
+                </button>
+              </div>
+            ) : (
+              <div ref={searchRef} className="relative">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setShowResults(true);
+                  }}
+                  onFocus={() => setShowResults(true)}
+                  onBlur={() => setTimeout(() => setShowResults(false), 200)}
+                  placeholder="Buscar producto por nombre o código..."
+                  className="bg-neutral-800 px-4 py-2.5 rounded-lg w-full border border-neutral-700 text-white placeholder-neutral-500"
+                  required
+                />
+                {showResults && searchQuery && (
+                  <div className="absolute z-10 mt-1 w-full bg-neutral-800 border border-neutral-700 rounded-lg max-h-48 overflow-y-auto shadow-xl">
+                    {filteredProducts.length > 0 ? (
+                      filteredProducts.map((p) => (
+                        <button
+                          key={p._id}
+                          type="button"
+                          onClick={() => {
+                            setSelectedRFIDProduct(p._id);
+                            setSelectedRFIDProductName(
+                              `${p.name}${p.code ? ` (${p.code})` : ""}`
+                            );
+                            setSearchQuery("");
+                            setShowResults(false);
+                          }}
+                          className="w-full text-left px-4 py-2 text-white hover:bg-neutral-700 transition border-b border-neutral-700 last:border-0"
+                        >
+                          {p.name}{" "}
+                          {p.code && (
+                            <span className="text-neutral-400">({p.code})</span>
+                          )}
+                        </button>
+                      ))
+                    ) : (
+                      <p className="px-4 py-2 text-neutral-500 text-sm">
+                        Sin resultados
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
             <p className="text-xs text-neutral-500 mt-1.5">
               Solo se actualizará el stock de este producto
             </p>

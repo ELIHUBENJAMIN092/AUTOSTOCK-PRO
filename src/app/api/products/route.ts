@@ -20,12 +20,17 @@ export async function GET(req: Request) {
 
     const q = url.searchParams.get("q")?.trim();
     const categoryFilter = url.searchParams.get("category")?.trim();
+    const rfidFilter = url.searchParams.get("rfid")?.trim();
 
     // Construir filtro
     const filters: any = {};
 
     if (categoryFilter && categoryFilter !== "all") {
       filters.category = categoryFilter;
+    }
+
+    if (rfidFilter === "true") {
+      filters.isRFID = true;
     }
 
     // Búsqueda por nombre o código
