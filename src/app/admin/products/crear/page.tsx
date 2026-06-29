@@ -26,24 +26,29 @@ export default function CreateProductPage() {
   }
 
   return (
-    <div className="w-full overflow-x-hidden px-4 md:px-6 text-white max-w-4xl mx-auto space-y-8">
-      <div className="flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold">Crear producto</h1>
+    <div className="w-full overflow-x-hidden px-4 md:px-6 text-white max-w-5xl mx-auto space-y-8">
+      <div className="rounded-[2rem] border border-cyan-700/40 bg-gradient-to-r from-cyan-950 via-slate-950 to-slate-900 p-6 shadow-xl shadow-cyan-500/15">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-2">
+            <p className="text-sm uppercase tracking-[0.3em] text-cyan-300">Administración de productos</p>
+            <h1 className="text-3xl font-bold text-white">Crear nuevo producto</h1>
+            <p className="max-w-3xl text-neutral-300">
+              Añade un producto nuevo al inventario con su información completa y una imagen para facilitar su identificación.
+            </p>
+          </div>
 
-        <Link
-          href="/admin/products"
-          className="bg-neutral-800 border border-neutral-700 text-white px-5 py-3 rounded-lg font-semibold hover:bg-neutral-700 transition"
-        >
-          Volver
-        </Link>
+          <Link
+            href="/admin/products"
+            className="inline-flex items-center justify-center rounded-2xl bg-neutral-800 px-5 py-3 text-sm font-semibold text-white transition hover:bg-neutral-700"
+          >
+            Volver al listado
+          </Link>
+        </div>
       </div>
 
-      <section className="bg-neutral-900 border border-neutral-800 rounded-xl p-4 md:p-6">
-        <ProductForm
-          categories={categories}
-          onCreated={handleCreated}
-        />
-      </section>
+      <div className="w-full">
+        <ProductForm categories={categories} onCreated={handleCreated} />
+      </div>
 
       <ScrollToTop />
     </div>

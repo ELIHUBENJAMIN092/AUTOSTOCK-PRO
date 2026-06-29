@@ -9,6 +9,7 @@ interface Props {
   updateStock: (id: string, delta: number) => void;
   saveStock: (product: Product) => Promise<void>;
   onEdit: (product: Product) => void;
+  onDelete: (product: Product) => void;
 }
 
 export default function ProductsTable({
@@ -17,6 +18,7 @@ export default function ProductsTable({
   updateStock,
   saveStock,
   onEdit,
+  onDelete,
 }: Props) {
   return (
     <table className="w-full text-sm">
@@ -30,16 +32,20 @@ export default function ProductsTable({
 
       <tbody>
         {products.map((product) => (
-          <tr key={product._id} className="border-b border-neutral-800">
-            <td className="py-2">{product.name}</td>
-            <td className="text-center">{product.stock}</td>
-            <td className="flex justify-end py-2">
+          <tr
+            key={product._id}
+            className="border-b border-neutral-800 hover:bg-slate-900/70 transition"
+          >
+            <td className="py-3 text-sm font-medium text-slate-100">{product.name}</td>
+            <td className="text-center text-slate-200">{product.stock}</td>
+            <td className="flex justify-end py-3">
               <ProductActions
                 product={product}
                 savedRow={savedRow}
                 onUpdateStock={updateStock}
                 onSave={saveStock}
                 onEdit={onEdit}
+                onDelete={onDelete}
               />
             </td>
           </tr>

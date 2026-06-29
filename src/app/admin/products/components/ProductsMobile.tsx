@@ -9,6 +9,7 @@ interface Props {
   updateStock: (id: string, delta: number) => void;
   saveStock: (product: Product) => Promise<void>;
   onEdit: (product: Product) => void;
+  onDelete: (product: Product) => void;
 }
 
 export default function ProductsMobile({
@@ -17,6 +18,7 @@ export default function ProductsMobile({
   updateStock,
   saveStock,
   onEdit,
+  onDelete,
 }: Props) {
   return (
     <div className="w-full max-w-full space-y-4 overflow-hidden">
@@ -41,6 +43,7 @@ export default function ProductsMobile({
                 onUpdateStock={updateStock}
                 onSave={saveStock}
                 onEdit={onEdit}
+                onDelete={onDelete}
               />
             </div>
           </div>

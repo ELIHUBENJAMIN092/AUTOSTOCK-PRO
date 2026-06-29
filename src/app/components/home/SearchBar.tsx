@@ -12,7 +12,7 @@ export default function SearchBar({
   placeholder = 'Buscar por nombre, número de parte o EPC...'
 }: SearchBarProps) {
   return (
-    <div className="max-w-3xl mx-auto mb-6 relative">
+    <div className="w-full mb-6 relative">
       {/* Icono búsqueda */}
       <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/70">
         <svg

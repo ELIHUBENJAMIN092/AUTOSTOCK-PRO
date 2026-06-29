@@ -1,6 +1,6 @@
 "use client";
 
-import { Minus, Plus, Save, Check, Pencil } from "lucide-react";
+import { Minus, Plus, Save, Check, Pencil, Trash2 } from "lucide-react";
 import type { Product } from "../types";
 
 interface Props {
@@ -9,6 +9,7 @@ interface Props {
   onUpdateStock: (id: string, delta: number) => void;
   onSave: (product: Product) => Promise<void>;
   onEdit: (product: Product) => void;
+  onDelete: (product: Product) => void;
 }
 
 export default function ProductActions({
@@ -17,6 +18,7 @@ export default function ProductActions({
   onUpdateStock,
   onSave,
   onEdit,
+  onDelete,
 }: Props) {
   const isSaved = savedRow === product._id;
 
@@ -28,6 +30,9 @@ export default function ProductActions({
 
   const greenBtn =
     "border-green-500 text-green-500 bg-green-500/10";
+
+  const redBtn =
+    "border-rose-500 text-rose-400 bg-rose-500/10 hover:text-white hover:border-rose-300";
 
   return (
     <div className="flex flex-wrap justify-end gap-2 w-full">
@@ -69,6 +74,15 @@ export default function ProductActions({
         title="Editar producto"
       >
         <Pencil className="w-4 h-4" />
+      </button>
+
+      {/* 🗑 Eliminar */}
+      <button
+        onClick={() => onDelete(product)}
+        className={`${baseBtn} ${redBtn}`}
+        title="Eliminar producto"
+      >
+        <Trash2 className="w-4 h-4" />
       </button>
     </div>
   );

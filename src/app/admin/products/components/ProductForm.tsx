@@ -81,126 +81,153 @@ export default function ProductForm({ categories, onCreated }: Props) {
   };
 
   return (
-    <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-4 md:p-6 max-w-xl mx-auto">
-
-      <h2 className="text-lg font-semibold mb-4">
-        Producto
-      </h2>
-
-      {error && <p className="text-red-500 mb-3">{error}</p>}
-
-      <form
-        onSubmit={handleSubmit}
-        className="flex flex-col gap-6 md:grid md:grid-cols-3"
-      >
-
-        {/* DATOS */}
-        <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-
-          <input
-            placeholder="Código"
-            value={code}
-            onChange={(e) => setCode(e.target.value.toUpperCase())}
-            className="bg-neutral-800 px-4 py-2 rounded"
-          />
-
-          <input
-            placeholder="Nombre"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="bg-neutral-800 px-4 py-2 rounded"
-          />
-
-          <input
-            placeholder="Ubicación"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="bg-neutral-800 px-4 py-2 rounded md:col-span-2"
-          />
-
-          <input
-            type="number"
-            placeholder="Precio"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            className="bg-neutral-800 px-4 py-2 rounded"
-          />
-
-          <input
-            type="number"
-            placeholder="Stock"
-            value={stock}
-            onChange={(e) => setStock(e.target.value)}
-            className="bg-neutral-800 px-4 py-2 rounded"
-          />
-
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className="bg-neutral-800 px-4 py-2 rounded md:col-span-2"
-          >
-            <option value="">Selecciona categoría</option>
-            {categories.map((c) => (
-              <option key={c._id} value={c._id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-
+    <div className="w-full p-6">
+      <div className="mb-6 space-y-3">
+        <span className="inline-flex rounded-full bg-cyan-500/10 px-3 py-1 text-xs uppercase tracking-[0.3em] text-cyan-300">
+          Nuevo producto
+        </span>
+        <div>
+          <h2 className="text-2xl font-semibold text-white">Información del producto</h2>
+          <p className="mt-2 text-sm text-neutral-400">
+            Completa los campos obligatorios y añade una imagen para facilitar la identificación en el inventario.
+          </p>
         </div>
+      </div>
 
-        {/* IMAGEN */}
-        <div className="flex justify-center">
+      {error && (
+        <div className="rounded-2xl border border-rose-500/20 bg-rose-500/10 p-4 text-sm text-rose-200 mb-6">
+          {error}
+        </div>
+      )}
 
-          <input
-            type="file"
-            id="imageUpload"
-            hidden
-            accept="image/*"
-            onChange={(e) =>
-              e.target.files && setImage(e.target.files[0])
-            }
-          />
+      <form onSubmit={handleSubmit} className="grid gap-6 lg:grid-cols-[1.5fr_0.9fr] w-full max-w-full">
+        <div className="grid gap-4">
+          <label className="block text-sm text-neutral-300">
+            Código
+            <input
+              placeholder="Código"
+              value={code}
+              onChange={(e) => setCode(e.target.value.toUpperCase())}
+              className="mt-2 w-full rounded-2xl border border-neutral-800 bg-neutral-950 px-4 py-3 text-white outline-none transition focus:border-cyan-500"
+            />
+          </label>
 
-          {!image ? (
-            <label
-              htmlFor="imageUpload"
-              className="w-44 h-44 border-2 border-dashed
-                         border-neutral-600 rounded-xl
-                         flex flex-col items-center justify-center
-                         cursor-pointer hover:bg-neutral-800 transition"
-            >
-              <ImageIcon size={40} />
-              <span className="text-sm mt-2">Subir imagen</span>
-            </label>
-          ) : (
-            <div className="relative w-44 h-44">
-              <img
-                src={URL.createObjectURL(image)}
-                className="w-full h-full object-cover rounded-xl"
+          <label className="block text-sm text-neutral-300">
+            Nombre
+            <input
+              placeholder="Nombre"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="mt-2 w-full rounded-2xl border border-neutral-800 bg-neutral-950 px-4 py-3 text-white outline-none transition focus:border-cyan-500"
+            />
+          </label>
+
+          <label className="block text-sm text-neutral-300">
+            Descripción / ubicación
+            <textarea
+              rows={3}
+              placeholder="Descripción"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="mt-2 w-full rounded-2xl border border-neutral-800 bg-neutral-950 px-4 py-3 text-white outline-none transition focus:border-cyan-500 resize-none"
+            />
+          </label>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <label className="block text-sm text-neutral-300">
+              Precio
+              <input
+                type="number"
+                placeholder="Precio"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                className="mt-2 w-full rounded-2xl border border-neutral-800 bg-neutral-950 px-4 py-3 text-white outline-none transition focus:border-cyan-500"
               />
-              <button
-                type="button"
-                onClick={() => setImage(null)}
-                className="absolute top-2 right-2 bg-black/70
-                           w-7 h-7 rounded-full text-white"
-              >
-                ✕
-              </button>
-            </div>
-          )}
+            </label>
 
+            <label className="block text-sm text-neutral-300">
+              Stock
+              <input
+                type="number"
+                placeholder="Stock"
+                value={stock}
+                onChange={(e) => setStock(e.target.value)}
+                className="mt-2 w-full rounded-2xl border border-neutral-800 bg-neutral-950 px-4 py-3 text-white outline-none transition focus:border-cyan-500"
+              />
+            </label>
+          </div>
+
+          <label className="block text-sm text-neutral-300">
+            Categoría
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="mt-2 w-full rounded-2xl border border-neutral-800 bg-neutral-950 px-4 py-3 text-white outline-none transition focus:border-cyan-500"
+            >
+              <option value="">Selecciona categoría</option>
+              {categories.map((c) => (
+                <option key={c._id} value={c._id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="md:col-span-3 bg-white text-black py-3 rounded font-semibold"
-        >
-          {loading ? "Guardando..." : "Agregar Producto"}
-        </button>
+        <div className="space-y-6">
+          <div className="rounded-[1.5rem] border border-neutral-800 bg-neutral-950/60 p-5 text-center">
+            <p className="text-sm uppercase tracking-[0.28em] text-cyan-300">Imagen</p>
+            <p className="mt-2 text-sm text-neutral-400">
+              Sube una foto para mejorar la visualización del producto.
+            </p>
 
+            <input
+              type="file"
+              id="imageUpload"
+              hidden
+              accept="image/*"
+              onChange={(e) => e.target.files && setImage(e.target.files[0])}
+            />
+
+            {!image ? (
+              <label
+                htmlFor="imageUpload"
+                className="mt-5 inline-flex h-44 w-full max-w-xs flex-col items-center justify-center rounded-3xl border border-neutral-700 bg-neutral-900 px-4 text-neutral-400 transition hover:border-emerald-400 hover:text-white"
+              >
+                <ImageIcon size={32} className="text-emerald-400" />
+                <span className="mt-3 text-sm text-white">Seleccionar imagen</span>
+                <span className="mt-1 text-xs text-neutral-500">
+                  JPG, PNG o WEBP · máximo 5 MB
+                </span>
+              </label>
+            ) : (
+              <div className="relative mx-auto mt-5 h-44 w-full max-w-xs overflow-hidden rounded-3xl border border-neutral-700 bg-black/20">
+                <img
+                  src={URL.createObjectURL(image)}
+                  alt="Previsualización"
+                  className="h-full w-full object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={() => setImage(null)}
+                  className="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-full bg-black/70 text-white transition hover:bg-black"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full rounded-3xl bg-emerald-500 px-6 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-emerald-500/20 transition hover:bg-emerald-400 disabled:opacity-60"
+          >
+            {loading ? "Guardando..." : "Agregar producto"}
+          </button>
+        </div>
       </form>
     </div>
   );
 }
+
