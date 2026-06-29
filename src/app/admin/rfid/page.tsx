@@ -130,10 +130,6 @@ export default function RFIDPage() {
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) return;
-    if (!selectedRFIDProduct) {
-      toast.error("Debe buscar y seleccionar un producto");
-      return;
-    }
 
     try {
       setLoading(true);
@@ -157,7 +153,7 @@ export default function RFIDPage() {
 
       setResult({
         updated: data.updated ?? 0,
-        newStock: data.newStock ?? 0,
+        newStock: data.newStock ?? -1,
         durationMs: data.durationMs ?? 0,
         notFound: Array.isArray(data.notFound) ? data.notFound : [],
       });
@@ -280,9 +276,7 @@ export default function RFIDPage() {
                   }}
                   onFocus={() => setShowResults(true)}
                   onBlur={() => setTimeout(() => setShowResults(false), 200)}
-                  placeholder="Buscar producto por nombre o código..."
-                  className="bg-neutral-800 px-4 py-2.5 rounded-lg w-full border border-neutral-700 text-white placeholder-neutral-500"
-                  required
+                  placeholder="Buscar producto por nombre o código (vacío = todos los RFID)"
                 />
                 {showResults && searchQuery && (
                   <div className="absolute z-10 mt-1 w-full bg-neutral-800 border border-neutral-700 rounded-lg max-h-48 overflow-y-auto shadow-xl">
@@ -317,7 +311,7 @@ export default function RFIDPage() {
               </div>
             )}
             <p className="text-xs text-neutral-500 mt-1.5">
-              Solo se actualizará el stock de este producto
+              Si seleccionas un producto solo actualiza ese. Si dejas vacío actualiza todos los productos con RFID ON.
             </p>
           </div>
 
@@ -363,8 +357,10 @@ export default function RFIDPage() {
 
         {result && (
           <div className="mt-6 rounded-3xl border border-neutral-800 bg-neutral-900 p-4 shadow-inner shadow-black/20">
-            <p className="text-sm text-emerald-300">✔ Producto actualizado: <span className="font-semibold text-white">{result.updated}</span></p>
-            <p className="text-sm text-amber-300">📦 Nuevo stock: <span className="font-semibold text-white">{result.newStock}</span></p>
+            <p className="text-sm text-emerald-300">✔ Productos actualizados: <span className="font-semibold text-white">{result.updated}</span></p>
+            {result.newStock >= 0 && (
+              <p className="text-sm text-amber-300">📦 Nuevo stock: <span className="font-semibold text-white">{result.newStock}</span></p>
+            )}
             <p className="text-sm text-cyan-300">⏱ Tiempo: <span className="font-semibold text-white">{result.durationMs} ms</span></p>
 
             {result.notFound.length > 0 && (

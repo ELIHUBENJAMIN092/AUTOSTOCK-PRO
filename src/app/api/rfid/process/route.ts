@@ -22,13 +22,6 @@ export async function POST(req: Request) {
       );
     }
 
-    if (!selectedProductId) {
-      return NextResponse.json(
-        { error: "Debe seleccionar un producto RFID para actualizar" },
-        { status: 400 }
-      );
-    }
-
     // =========================
     // Leer CSV
     // =========================
@@ -89,35 +82,50 @@ export async function POST(req: Request) {
     }
 
     // =========================
-    // Actualizar solo el producto seleccionado
+    // Actualizar producto(s)
     // =========================
-    const rfidProduct = await Product.findOne({
-      _id: selectedProductId,
-      isRFID: true,
-      isActive: true,
-    }).select("_id");
+    let updated = 0;
+    let productId = "";
+    let newStock = 0;
 
-    if (!rfidProduct) {
-      return NextResponse.json(
-        { error: "Producto no encontrado o no tiene RFID activo" },
-        { status: 404 }
-      );
+    if (selectedProductId) {
+      // Producto específico
+      const rfidProduct = await Product.findOne({
+        _id: selectedProductId,
+        isRFID: true,
+        isActive: true,
+      }).select("_id");
+
+      if (rfidProduct) {
+        const pid = rfidProduct._id.toString();
+        newStock = productStock[pid] || 0;
+        await Product.findByIdAndUpdate(pid, {
+          $set: { stock: newStock, updatedAt: new Date() },
+        });
+        updated = 1;
+        productId = pid;
+      }
+    } else {
+      // Todos los productos con RFID ON
+      const rfidProducts = await Product.find({
+        isRFID: true,
+        isActive: true,
+      }).select("_id");
+
+      for (const product of rfidProducts) {
+        const pid = product._id.toString();
+        const stock = productStock[pid] || 0;
+        await Product.findByIdAndUpdate(pid, {
+          $set: { stock, updatedAt: new Date() },
+        });
+        updated++;
+      }
     }
 
-    const pid = rfidProduct._id.toString();
-    const newStock = productStock[pid] || 0;
-
-    await Product.findByIdAndUpdate(pid, {
-      $set: {
-        stock: newStock,
-        updatedAt: new Date(),
-      },
-    });
-
     return NextResponse.json({
-      updated: 1,
-      productId: pid,
-      newStock,
+      updated,
+      ...(productId && { productId }),
+      ...(selectedProductId && { newStock }),
       notFound,
       durationMs: Date.now() - start,
     });
