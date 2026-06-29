@@ -70,7 +70,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           </div>
 
           {/* CATEGORÍA */}
-          {product.category?.name && (
+          {typeof product.category !== 'string' && product.category?.name && (
             <div className="mt-2">
               <span
                 className="
