@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import { Scan } from "lucide-react";
+import { Wifi } from "lucide-react";
 import LoginModal from '../auth/LoginModal'
 
 export default function Navbar() {
@@ -32,7 +32,7 @@ export default function Navbar() {
           {/* LOGO */}
           <Link href="/" className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-cyan-500/10 text-cyan-300 ring-1 ring-cyan-500/20">
-              <Scan size={22} />
+              <Wifi size={22} />
             </div>
             <div>
               <p className="text-xs uppercase tracking-[0.4em] text-cyan-300">RFID</p>

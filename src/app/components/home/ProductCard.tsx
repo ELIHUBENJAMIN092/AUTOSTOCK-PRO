@@ -20,14 +20,6 @@ export default function ProductCard({ product }: ProductCardProps) {
           className="w-full h-full object-contain object-center"
         />
 
-        {/* RFID ON */}
-        {product.isRFID && (
-          <span className="absolute top-3 left-3 flex items-center gap-1 px-3 py-1 text-xs font-semibold rounded-full bg-cyan-500 text-white">
-            <Wifi size={12} />
-            RFID ON
-          </span>
-        )}
-
         {/* ESTADO */}
         <span
           className={`absolute top-3 right-3 px-3 py-1 text-xs font-semibold rounded-full ${
@@ -48,6 +40,16 @@ export default function ProductCard({ product }: ProductCardProps) {
 
       {/* CONTENIDO */}
       <div className="bg-neutral-800 p-5 flex-1 flex flex-col">
+
+        {/* RFID ON */}
+        {product.isRFID && (
+          <div className="flex justify-end mb-2">
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-md bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
+              <Wifi size={12} />
+              RFID ON
+            </span>
+          </div>
+        )}
 
         {/* CÓDIGO */}
         <span className="text-xs text-neutral-400 tracking-wide">

@@ -67,7 +67,7 @@ export default function MessagesPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="w-full overflow-x-hidden px-4 md:px-6 text-white max-w-screen-xl mx-auto space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-white">Consultas</h2>
@@ -105,7 +105,7 @@ export default function MessagesPage() {
                   : "border-cyan-700/30 bg-neutral-900 shadow-md shadow-cyan-500/5"
               }`}
             >
-              <div className="flex items-start justify-between gap-4">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4">
                 <div className="flex items-center gap-3 min-w-0">
                   {msg.isRead ? (
                     <MailOpen size={18} className="text-neutral-500 shrink-0 mt-0.5" />
@@ -120,8 +120,8 @@ export default function MessagesPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 shrink-0">
-                  <span className="text-xs text-neutral-500 flex items-center gap-1">
+                <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+                  <span className="text-xs text-neutral-500 flex items-center gap-1 whitespace-nowrap">
                     <Calendar size={12} />
                     {formatDate(msg.createdAt)}
                   </span>
@@ -130,7 +130,7 @@ export default function MessagesPage() {
                       e.stopPropagation();
                       toggleRead(msg._id, msg.isRead);
                     }}
-                    className={`text-xs px-3 py-1 rounded-full border transition ${
+                    className={`text-xs px-3 py-1 rounded-full border transition whitespace-nowrap ${
                       msg.isRead
                         ? "border-neutral-700 text-neutral-500 hover:border-cyan-600 hover:text-cyan-300"
                         : "border-cyan-700/40 text-cyan-300 hover:bg-cyan-500/10"

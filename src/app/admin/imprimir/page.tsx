@@ -203,7 +203,7 @@ export default function PrintInventoryPage() {
   };
 
   return (
-    <div className="w-full max-w-screen-xl mx-auto px-4 md:px-6 py-6 text-white space-y-8">
+    <div className="w-full overflow-x-hidden px-4 md:px-6 py-6 text-white max-w-screen-xl mx-auto space-y-8">
       <div className="rounded-[2rem] border border-sky-700/30 bg-gradient-to-r from-slate-950 via-sky-950 to-slate-900 p-6 shadow-xl shadow-sky-500/10">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>

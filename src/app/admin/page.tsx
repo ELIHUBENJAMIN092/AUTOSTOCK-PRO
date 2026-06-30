@@ -5,6 +5,7 @@ import { connectDB } from "@/lib/db";
 import Product from "@/models/Product";
 import Category from "@/models/Category";
 import RFIDTag from "@/models/RFIDTag";
+import StatsCards from "./components/StatsCards";
 
 export default async function AdminPage() {
   // Obtener sesión en el servidor
@@ -39,7 +40,7 @@ export default async function AdminPage() {
   ]);
 
   return (
-    <div className="space-y-8">
+    <div className="w-full overflow-x-hidden px-4 md:px-6 text-white max-w-screen-xl mx-auto space-y-8">
       <div>
         <h1 className="text-3xl font-bold mb-2">Panel de Administración</h1>
         <p className="text-neutral-400 max-w-2xl">
@@ -48,43 +49,14 @@ export default async function AdminPage() {
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <div className="p-6 rounded-3xl bg-gradient-to-br from-sky-950 to-sky-900 border border-sky-700 shadow-sm">
-          <p className="text-sm uppercase text-sky-300 tracking-[0.18em]">Productos totales</p>
-          <p className="text-4xl font-semibold mt-4 text-white">{totalProducts}</p>
-          <p className="text-sm text-sky-200 mt-2">Incluye productos activos e inactivos.</p>
-        </div>
-
-        <div className="p-6 rounded-3xl bg-gradient-to-br from-emerald-950 to-emerald-900 border border-emerald-700 shadow-sm">
-          <p className="text-sm uppercase text-emerald-300 tracking-[0.18em]">Productos activos</p>
-          <p className="text-4xl font-semibold mt-4 text-white">{activeProducts}</p>
-          <p className="text-sm text-emerald-200 mt-2">Productos disponibles para venta.</p>
-        </div>
-
-        <div className="p-6 rounded-3xl bg-gradient-to-br from-violet-950 to-violet-900 border border-violet-700 shadow-sm">
-          <p className="text-sm uppercase text-violet-300 tracking-[0.18em]">Productos RFID</p>
-          <p className="text-4xl font-semibold mt-4 text-white">{rfidEnabledProducts}</p>
-          <p className="text-sm text-violet-200 mt-2">Productos con control RFID activado.</p>
-        </div>
-
-        <div className="p-6 rounded-3xl bg-gradient-to-br from-amber-950 to-amber-900 border border-amber-700 shadow-sm">
-          <p className="text-sm uppercase text-amber-300 tracking-[0.18em]">Categorías</p>
-          <p className="text-4xl font-semibold mt-4 text-white">{totalCategories}</p>
-          <p className="text-sm text-amber-200 mt-2">Categorías creadas en el catálogo.</p>
-        </div>
-
-        <div className="p-6 rounded-3xl bg-gradient-to-br from-fuchsia-950 to-fuchsia-900 border border-fuchsia-700 shadow-sm">
-          <p className="text-sm uppercase text-fuchsia-300 tracking-[0.18em]">Etiquetas RFID</p>
-          <p className="text-4xl font-semibold mt-4 text-white">{totalRFIDTags}</p>
-          <p className="text-sm text-fuchsia-200 mt-2">Tags RFID registrados en el sistema.</p>
-        </div>
-
-        <div className="p-6 rounded-3xl bg-gradient-to-br from-rose-950 to-rose-900 border border-rose-700 shadow-sm">
-          <p className="text-sm uppercase text-rose-300 tracking-[0.18em]">Stock bajo</p>
-          <p className="text-4xl font-semibold mt-4 text-white">{lowStockProducts}</p>
-          <p className="text-sm text-rose-200 mt-2">Productos con stock menor o igual a 5.</p>
-        </div>
-      </div>
+      <StatsCards
+        totalProducts={totalProducts}
+        activeProducts={activeProducts}
+        rfidEnabledProducts={rfidEnabledProducts}
+        totalCategories={totalCategories}
+        totalRFIDTags={totalRFIDTags}
+        lowStockProducts={lowStockProducts}
+      />
 
       <div className="grid gap-4 lg:grid-cols-2">
         <div className="p-6 rounded-3xl bg-neutral-900 border border-neutral-800 shadow-sm space-y-4">

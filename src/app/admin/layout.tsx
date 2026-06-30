@@ -140,19 +140,6 @@ export default function AdminLayout({
         className="flex-1 min-h-screen p-6 md:p-8 max-w-screen-xl mx-auto"
         onClick={() => menuOpen && setMenuOpen(false)}
       >
-        <div className="mb-6 rounded-[2rem] border border-slate-800 bg-slate-950/90 p-5 shadow-2xl shadow-cyan-500/10">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm uppercase tracking-[0.35em] text-cyan-300">Administrador</p>
-              <h2 className="text-3xl font-bold text-white">Panel de administración</h2>
-            </div>
-            <div className="inline-flex items-center gap-2 rounded-3xl bg-slate-900/90 px-4 py-3 text-sm text-slate-300 ring-1 ring-slate-700">
-              <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-md shadow-emerald-500/20" />
-              Activo
-            </div>
-          </div>
-        </div>
-
         {children}
       </main>
 

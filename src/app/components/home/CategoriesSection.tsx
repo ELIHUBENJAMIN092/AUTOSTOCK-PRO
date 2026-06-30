@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Tags } from "lucide-react";
+import { Tags, ChevronDown, ChevronUp } from "lucide-react";
 
 type Category = {
   _id: string;
@@ -13,6 +13,7 @@ type Category = {
 export default function CategoriesSection() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showAll, setShowAll] = useState(false);
 
   useEffect(() => {
     fetch("/api/categories")
@@ -27,6 +28,8 @@ export default function CategoriesSection() {
 
   if (loading) return null;
   if (categories.length === 0) return null;
+
+  const visibleCategories = showAll ? categories : categories.slice(0, 6);
 
   return (
     <section id="categorias" className="bg-slate-950 py-20">
@@ -44,7 +47,7 @@ export default function CategoriesSection() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {categories.map((cat) => (
+          {visibleCategories.map((cat) => (
             <div
               key={cat._id}
               className="rounded-2xl border border-slate-800 bg-slate-900/80 p-6 transition hover:border-cyan-700/30 hover:shadow-md hover:shadow-cyan-500/5"
@@ -63,6 +66,21 @@ export default function CategoriesSection() {
             </div>
           ))}
         </div>
+
+        {categories.length > 6 && (
+          <div className="flex justify-center mt-8">
+            <button
+              onClick={() => setShowAll(!showAll)}
+              className="inline-flex items-center gap-2 rounded-full border border-cyan-700/30 bg-cyan-500/10 px-6 py-3 text-sm font-medium text-cyan-300 transition hover:bg-cyan-500/20"
+            >
+              {showAll ? (
+                <>Ver menos <ChevronUp size={16} /></>
+              ) : (
+                <>Ver más ({categories.length - 6} restantes) <ChevronDown size={16} /></>
+              )}
+            </button>
+          </div>
+        )}
       </div>
     </section>
   );
