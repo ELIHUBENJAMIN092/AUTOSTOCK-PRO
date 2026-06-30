@@ -15,6 +15,7 @@ export interface Product {
   category?: Category | string;
   image?: string;
   isActive?: boolean;
+  isRFID?: boolean;
   createdAt?: string;
   updatedAt?: string;
 }

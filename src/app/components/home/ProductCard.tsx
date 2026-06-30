@@ -1,4 +1,5 @@
 import { Product } from '@/types'
+import { Wifi } from "lucide-react"
 import Card from '@/app/components/ui/Card'
 
 interface ProductCardProps {
@@ -18,6 +19,14 @@ export default function ProductCard({ product }: ProductCardProps) {
           alt={product.name}
           className="w-full h-full object-contain object-center"
         />
+
+        {/* RFID ON */}
+        {product.isRFID && (
+          <span className="absolute top-3 left-3 flex items-center gap-1 px-3 py-1 text-xs font-semibold rounded-full bg-cyan-500 text-white">
+            <Wifi size={12} />
+            RFID ON
+          </span>
+        )}
 
         {/* ESTADO */}
         <span

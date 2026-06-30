@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Trash2 } from "lucide-react";
+import { Trash2, Search } from "lucide-react";
 import IconButton from '@/app/components/ui/IconButton'
 import Button from '@/app/components/ui/Button'
 import toast from "react-hot-toast";
@@ -101,6 +101,7 @@ export default function SearchEPCModule() {
       <h2 className="text-lg font-semibold mb-4">Buscar EPC</h2>
 
       <div className="relative mb-4">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" size={18} />
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -108,9 +109,9 @@ export default function SearchEPCModule() {
             if (e.key === "Enter") handleSearch();
           }}
           placeholder="Buscar EPC..."
-          className="w-full pl-4 pr-10 py-3 rounded-lg
-          bg-neutral-800 border border-neutral-700 text-white
-          focus:outline-none focus:border-neutral-500"
+          className="w-full pl-10 pr-10 py-2.5 rounded-lg
+          bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500
+          focus:outline-none focus:border-cyan-500 transition"
         />
 
         {search && (

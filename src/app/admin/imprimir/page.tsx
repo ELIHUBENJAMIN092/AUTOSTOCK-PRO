@@ -37,9 +37,9 @@ export default function PrintInventoryPage() {
   const user = session?.user?.name || session?.user?.email || "Usuario";
 
   useEffect(() => {
-    fetch("/api/products")
+    fetch("/api/products?limit=10000")
       .then((r) => r.json())
-      .then((d) => setProducts(Array.isArray(d) ? d : []))
+      .then((d) => setProducts(Array.isArray(d?.products) ? d.products : []))
       .catch(() => setProducts([]));
   }, []);
 

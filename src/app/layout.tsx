@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Toaster } from "react-hot-toast";
 import Providers from "./providers";   // ⭐ IMPORTANTE
 import { montserrat } from "./fonts";
+import WhatsAppButton from "./components/WhatsAppButton";
 import "./globals.css";
 
 const font = montserrat;
@@ -41,6 +42,8 @@ export default function RootLayout({
             },
           }}
         />
+
+        <WhatsAppButton />
 
       </body>
     </html>

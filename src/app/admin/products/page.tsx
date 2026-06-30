@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import toast from "react-hot-toast";
 import { useProducts } from "./hooks/useProducts";
 
 import { ArrowRight } from "lucide-react";
@@ -95,21 +96,29 @@ export default function ProductsPage() {
 
     setSaving(true);
 
-    await fetch(`/api/products/${editProduct._id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        code: editProduct.code,
-        name: editProduct.name,
-        description: editProduct.description,
-        price: editProduct.price,
-        stock: editProduct.stock,
-        minStock: editProduct.minStock,
-        category: editProduct.category?._id,
-        isRFID: editProduct.isRFID,
-        isActive: editProduct.isActive,
-      }),
-    });
+    try {
+      const res = await fetch(`/api/products/${editProduct._id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code: editProduct.code,
+          name: editProduct.name,
+          description: editProduct.description,
+          price: editProduct.price,
+          stock: editProduct.stock,
+          minStock: editProduct.minStock,
+          category: editProduct.category?._id,
+          isRFID: editProduct.isRFID,
+          isActive: editProduct.isActive,
+        }),
+      });
+
+      if (!res.ok) throw new Error();
+
+      toast.success("Producto actualizado correctamente");
+    } catch {
+      toast.error("Error al actualizar el producto");
+    }
 
     setSaving(false);
     setEditProduct(null);
@@ -123,11 +132,18 @@ export default function ProductsPage() {
 
     if (!confirmed) return;
 
-    await fetch(`/api/products/${product._id}`, {
-      method: "DELETE",
-    });
+    try {
+      const res = await fetch(`/api/products/${product._id}`, {
+        method: "DELETE",
+      });
 
-    refreshProducts();
+      if (!res.ok) throw new Error();
+
+      toast.success("Producto eliminado correctamente");
+      refreshProducts();
+    } catch {
+      toast.error("Error al eliminar el producto");
+    }
   };
 
   if (loading) {

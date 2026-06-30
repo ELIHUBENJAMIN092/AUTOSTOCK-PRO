@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import ScrollToTop from "@/app/components/ScrollToTop";
 import Button from '@/app/components/ui/Button'
 
@@ -33,23 +34,37 @@ export default function CategoriesPage() {
   const createCategory = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    await fetch("/api/categories", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, description }),
-    });
+    try {
+      const res = await fetch("/api/categories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, description }),
+      });
 
-    setName("");
-    setDescription("");
-    fetchCategories();
+      if (!res.ok) throw new Error();
+
+      toast.success("Categoría creada correctamente");
+      setName("");
+      setDescription("");
+      fetchCategories();
+    } catch {
+      toast.error("Error al crear la categoría");
+    }
   };
 
   const toggleCategory = async (id: string) => {
-    await fetch(`/api/categories/${id}/toggle`, {
-      method: "PATCH",
-    });
+    try {
+      const res = await fetch(`/api/categories/${id}/toggle`, {
+        method: "PATCH",
+      });
 
-    fetchCategories();
+      if (!res.ok) throw new Error();
+
+      toast.success("Estado actualizado");
+      fetchCategories();
+    } catch {
+      toast.error("Error al actualizar la categoría");
+    }
   };
 
   return (

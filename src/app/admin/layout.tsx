@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { signOut } from "next-auth/react";
+import { LayoutDashboard, Tags, Package, Scan, Printer, MessageSquare } from "lucide-react";
 import Button from '@/app/components/ui/Button'
 import IconButton from '@/app/components/ui/IconButton'
 
@@ -16,12 +18,7 @@ export default function AdminLayout({
 
   // Logout seguro
   const handleLogout = () => {
-    try {
-      localStorage.removeItem("token");
-      sessionStorage.clear();
-    } catch {}
-
-    router.push("/");
+    signOut({ callbackUrl: "/" });
   };
 
   const handleLinkClick = () => {
@@ -77,42 +74,56 @@ export default function AdminLayout({
         <nav className="space-y-3 mb-6">
           <Link
             href="/admin"
-            className="block rounded-3xl px-4 py-3 text-sm font-medium text-slate-200 transition hover:bg-cyan-500/15 hover:text-cyan-200"
+            className="flex items-center gap-3 rounded-3xl px-4 py-3 text-sm font-medium text-slate-200 transition hover:bg-cyan-500/15 hover:text-cyan-200"
             onClick={handleLinkClick}
           >
+            <LayoutDashboard size={18} className="text-slate-300" />
             Dashboard
           </Link>
 
           <Link
             href="/admin/categories"
-            className="block rounded-3xl px-4 py-3 text-sm font-medium text-slate-200 transition hover:bg-cyan-500/15 hover:text-cyan-200"
+            className="flex items-center gap-3 rounded-3xl px-4 py-3 text-sm font-medium text-slate-200 transition hover:bg-cyan-500/15 hover:text-cyan-200"
             onClick={handleLinkClick}
           >
+            <Tags size={18} className="text-slate-300" />
             Categorías
           </Link>
 
           <Link
             href="/admin/products"
-            className="block rounded-3xl px-4 py-3 text-sm font-medium text-slate-200 transition hover:bg-cyan-500/15 hover:text-cyan-200"
+            className="flex items-center gap-3 rounded-3xl px-4 py-3 text-sm font-medium text-slate-200 transition hover:bg-cyan-500/15 hover:text-cyan-200"
             onClick={handleLinkClick}
           >
+            <Package size={18} className="text-slate-300" />
             Productos
           </Link>
 
           <Link
             href="/admin/rfid"
-            className="block rounded-3xl px-4 py-3 text-sm font-medium text-slate-200 transition hover:bg-cyan-500/15 hover:text-cyan-200"
+            className="flex items-center gap-3 rounded-3xl px-4 py-3 text-sm font-medium text-slate-200 transition hover:bg-cyan-500/15 hover:text-cyan-200"
             onClick={handleLinkClick}
           >
+            <Scan size={18} className="text-slate-300" />
             RFID
           </Link>
 
           <Link
-            href="/admin/imprimir"
-            className="block rounded-3xl px-4 py-3 text-sm font-medium text-slate-200 transition hover:bg-cyan-500/15 hover:text-cyan-200"
+            href="/admin/messages"
+            className="flex items-center gap-3 rounded-3xl px-4 py-3 text-sm font-medium text-slate-200 transition hover:bg-cyan-500/15 hover:text-cyan-200"
             onClick={handleLinkClick}
           >
-            🖨️ Imprimir
+            <MessageSquare size={18} className="text-slate-300" />
+            Consultas
+          </Link>
+
+          <Link
+            href="/admin/imprimir"
+            className="flex items-center gap-3 rounded-3xl px-4 py-3 text-sm font-medium text-slate-200 transition hover:bg-cyan-500/15 hover:text-cyan-200"
+            onClick={handleLinkClick}
+          >
+            <Printer size={18} className="text-slate-300" />
+            Imprimir
           </Link>
         </nav>
 

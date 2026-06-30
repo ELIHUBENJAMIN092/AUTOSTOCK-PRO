@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import toast from "react-hot-toast";
 import type { Product } from "@/app/admin/products/types";
 import Button from '@/app/components/ui/Button'
 
@@ -12,27 +13,29 @@ export default function RegisterEPC({ products }: Props) {
   const [epc, setEpc] = useState("");
   const [productId, setProductId] = useState("");
   const [loading, setLoading] = useState(false);
-  const [msg, setMsg] = useState<string | null>(null);
 
   const handleSave = async () => {
     if (!epc || !productId) return;
 
     setLoading(true);
-    setMsg(null);
 
-    const res = await fetch("/api/rfid/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ epc, productId }),
-    });
+    try {
+      const res = await fetch("/api/rfid/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ epc, productId }),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (!res.ok) {
-      setMsg(data.error || "Error");
-    } else {
-      setMsg("✅ EPC registrado correctamente");
-      setEpc("");
+      if (!res.ok) {
+        toast.error(data.error || "Error al registrar EPC");
+      } else {
+        toast.success("EPC registrado correctamente");
+        setEpc("");
+      }
+    } catch {
+      toast.error("Error al registrar EPC");
     }
 
     setLoading(false);
@@ -63,8 +66,6 @@ export default function RegisterEPC({ products }: Props) {
       />
 
       <Button onClick={handleSave} disabled={loading} className="bg-white text-black px-6 py-2 rounded font-medium disabled:opacity-50">{loading ? "Guardando..." : "Registrar EPC"}</Button>
-
-      {msg && <p className="text-sm text-neutral-300">{msg}</p>}
     </div>
   );
 }

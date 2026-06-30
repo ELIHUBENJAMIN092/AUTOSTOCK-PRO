@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
 import type { Product, Category } from "../types";
 
 export function useProducts() {
@@ -79,6 +80,7 @@ export function useProducts() {
     if (!response.ok) {
       const errorPayload = await response.json().catch(() => null);
       console.error("Error guardando stock:", errorPayload || response.statusText);
+      toast.error("Error al guardar el stock");
       return;
     }
 

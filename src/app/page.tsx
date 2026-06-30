@@ -1,5 +1,6 @@
 import Navbar from './components/layout/Navbar'
 import Hero from './components/home/Hero'
+import CategoriesSection from './components/home/CategoriesSection'
 import Inventory from './components/home/Inventory'
 import Footer from './components/layout/Footer'
 import ScrollToTop from './components/ScrollToTop'
@@ -12,6 +13,9 @@ export default function HomePage() {
 
       {/* HERO */}
       <Hero />
+
+      {/* CATEGORÍAS */}
+      <CategoriesSection />
 
       {/* INVENTARIO */}
       <Inventory />

@@ -2,11 +2,27 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
+import { Scan } from "lucide-react";
+import LoginModal from '../auth/LoginModal'
 
 export default function Navbar() {
+  const router = useRouter()
+  const { data: session } = useSession()
   const [mobileNavOpen, setMobileNavOpen] = useState(false)
+  const [isLoginOpen, setIsLoginOpen] = useState(false)
+
+  const handleAdminClick = () => {
+    if (session?.user?.role === "admin") {
+      router.push("/admin")
+    } else {
+      setIsLoginOpen(true)
+    }
+  }
 
   return (
+    <>
     <nav className="w-full sticky top-0 z-50 bg-slate-950/95 backdrop-blur-xl border-b border-cyan-500/10 shadow-xl shadow-cyan-500/10">
       
       {/* CONTENEDOR */}
@@ -16,7 +32,7 @@ export default function Navbar() {
           {/* LOGO */}
           <Link href="/" className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-cyan-500/10 text-cyan-300 ring-1 ring-cyan-500/20">
-              CP
+              <Scan size={22} />
             </div>
             <div>
               <p className="text-xs uppercase tracking-[0.4em] text-cyan-300">RFID</p>
@@ -36,13 +52,19 @@ export default function Navbar() {
           {/* MENÚ DESKTOP */}
           <ul className="hidden lg:flex items-center gap-10 text-slate-300">
             <li>
-              <Link href="#inventario" className="hover:text-white transition">
+              <Link href="/" className="hover:text-white transition">
+                Inicio
+              </Link>
+            </li>
+
+            <li>
+              <Link href="/#inventario" className="hover:text-white transition">
                 Inventario
               </Link>
             </li>
 
             <li>
-              <Link href="#categorias" className="hover:text-white transition">
+              <Link href="/#categorias" className="hover:text-white transition">
                 Categorías
               </Link>
             </li>
@@ -53,12 +75,12 @@ export default function Navbar() {
               </Link>
             </li>
 
-            <Link
-              href="/admin"
+            <button
+              onClick={handleAdminClick}
               className="ml-4 px-5 py-2 bg-gradient-to-r from-cyan-500 to-sky-500 text-slate-950 rounded-full font-semibold shadow-xl shadow-cyan-500/20 transition hover:from-cyan-400 hover:to-sky-400"
             >
               Acceso Admin
-            </Link>
+            </button>
           </ul>
         </div>
       </div>
@@ -67,11 +89,15 @@ export default function Navbar() {
       {mobileNavOpen && (
         <div className="lg:hidden bg-slate-950/95 border-t border-cyan-500/10">
           <div className="max-w-7xl mx-auto px-6 py-6 flex flex-col gap-4 text-slate-300">
-            <Link href="#inventario" onClick={() => setMobileNavOpen(false)} className="rounded-3xl px-4 py-3 hover:bg-slate-900/80 hover:text-white transition">
+            <Link href="/" onClick={() => setMobileNavOpen(false)} className="rounded-3xl px-4 py-3 hover:bg-slate-900/80 hover:text-white transition">
+              Inicio
+            </Link>
+
+            <Link href="/#inventario" onClick={() => setMobileNavOpen(false)} className="rounded-3xl px-4 py-3 hover:bg-slate-900/80 hover:text-white transition">
               Inventario
             </Link>
 
-            <Link href="#categorias" onClick={() => setMobileNavOpen(false)} className="rounded-3xl px-4 py-3 hover:bg-slate-900/80 hover:text-white transition">
+            <Link href="/#categorias" onClick={() => setMobileNavOpen(false)} className="rounded-3xl px-4 py-3 hover:bg-slate-900/80 hover:text-white transition">
               Categorías
             </Link>
 
@@ -79,16 +105,22 @@ export default function Navbar() {
               Contacto
             </Link>
 
-            <Link
-              href="/admin"
-              onClick={() => setMobileNavOpen(false)}
+            <button
+              onClick={() => {
+                setMobileNavOpen(false)
+                handleAdminClick()
+              }}
               className="mt-2 px-5 py-2 bg-gradient-to-r from-cyan-500 to-sky-500 text-slate-950 rounded-full font-semibold text-center shadow-xl shadow-cyan-500/20 transition hover:from-cyan-400 hover:to-sky-400"
             >
               Acceso Admin
-            </Link>
+            </button>
           </div>
         </div>
       )}
+
     </nav>
+
+      <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
+    </>
   )
 }

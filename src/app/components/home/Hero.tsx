@@ -1,4 +1,23 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import LoginModal from "../auth/LoginModal";
+
 export default function Hero() {
+  const router = useRouter();
+  const { data: session } = useSession();
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+
+  const handleAdminClick = () => {
+    if (session?.user?.role === "admin") {
+      router.push("/admin");
+    } else {
+      setIsLoginOpen(true);
+    }
+  };
+
   return (
     <section className="relative overflow-hidden bg-slate-950">
       <div className="absolute inset-x-0 top-0 h-72 bg-gradient-to-r from-cyan-500/15 via-sky-500/10 to-violet-500/0 blur-3xl" />
@@ -24,12 +43,12 @@ export default function Hero() {
                 Ver Inventario
               </a>
 
-              <a
-                href="/admin"
+              <button
+                onClick={handleAdminClick}
                 className="inline-flex items-center justify-center rounded-full border border-white/15 bg-white/5 px-8 py-3 text-sm font-medium text-white transition hover:border-cyan-300/30 hover:bg-white/10"
               >
                 Acceso Admin
-              </a>
+              </button>
             </div>
           </div>
 
@@ -68,6 +87,8 @@ export default function Hero() {
 
         </div>
       </div>
+
+      <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
     </section>
   );
 }

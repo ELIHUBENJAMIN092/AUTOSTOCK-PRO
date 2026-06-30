@@ -26,7 +26,7 @@ export default function ScrollToTop() {
       onClick={scrollToTop}
       aria-label="Volver arriba"
       className={`
-        fixed bottom-6 right-6 z-50
+        fixed bottom-6 left-1/2 -translate-x-1/2 z-50
         h-12 w-12 rounded-full
         bg-white text-black
         shadow-lg

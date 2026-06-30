@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo, useRef } from "react";
 import ScrollToTop from "@/app/components/ScrollToTop";
 import toast from "react-hot-toast";
-import { UploadCloud, CheckCircle } from "lucide-react";
+import { UploadCloud, CheckCircle, Search } from "lucide-react";
 import SearchEPC from "./components/SearchEPC";
 import Button from '@/app/components/ui/Button'
 
@@ -267,6 +267,7 @@ export default function RFIDPage() {
               </div>
             ) : (
               <div ref={searchRef} className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" size={18} />
                 <input
                   type="text"
                   value={searchQuery}
@@ -276,7 +277,8 @@ export default function RFIDPage() {
                   }}
                   onFocus={() => setShowResults(true)}
                   onBlur={() => setTimeout(() => setShowResults(false), 200)}
-                  placeholder="Buscar producto por nombre o código (vacío = todos los RFID)"
+                  placeholder="Buscar producto a actualizar con RFID"
+                  className="bg-neutral-800 w-full pl-10 pr-4 py-2.5 rounded-lg border border-neutral-700 text-white placeholder-neutral-500 focus:outline-none focus:border-cyan-500 transition"
                 />
                 {showResults && searchQuery && (
                   <div className="absolute z-10 mt-1 w-full bg-neutral-800 border border-neutral-700 rounded-lg max-h-48 overflow-y-auto shadow-xl">
