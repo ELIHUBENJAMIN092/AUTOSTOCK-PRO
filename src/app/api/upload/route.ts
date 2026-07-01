@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import cloudinary from "@/lib/cloudinary";
+import { requireAdmin } from "@/lib/require-admin";
 
 export async function POST(req: Request) {
+  const unauthorized = await requireAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     const formData = await req.formData();
     const file = formData.get("file") as File | null;

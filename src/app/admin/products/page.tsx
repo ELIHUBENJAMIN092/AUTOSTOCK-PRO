@@ -4,16 +4,19 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { useProducts } from "./hooks/useProducts";
 
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Download } from "lucide-react";
+import { Skeleton } from '@/app/components/ui/Skeleton';
 import ProductsTable from "./components/ProductsTable";
 import ProductsMobile from "./components/ProductsMobile";
 import EditProductModal from "./components/EditProductModal";
 import SearchBar from "@/app/components/home/SearchBar";
 import Button from '@/app/components/ui/Button'
+import { TableSkeleton } from '@/app/components/ui/Skeleton'
+import ConfirmModal from '@/app/components/ui/ConfirmModal'
 import ScrollToTop from "@/app/components/ScrollToTop";
 
 import Link from "next/link";
-import type { Product } from "./types";
+import type { Product, Category } from "@/types";
 
 export default function ProductsPage() {
   const {
@@ -24,7 +27,11 @@ export default function ProductsPage() {
     total,
     page,
     limit,
+    stockMin,
+    stockMax,
     setPage,
+    setStockMin,
+    setStockMax,
     updateStock,
     saveStock,
     refreshProducts,
@@ -33,13 +40,15 @@ export default function ProductsPage() {
   const [search, setSearch] = useState("");
   const [editProduct, setEditProduct] = useState<Product | null>(null);
   const [saving, setSaving] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<Product | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const searchResetRef = useRef(false);
 
   useEffect(() => {
     searchResetRef.current = true;
     setPage(1);
     refreshProducts(search, 1);
-  }, [search, refreshProducts, setPage]);
+  }, [search, refreshProducts, setPage, stockMin, stockMax]);
 
   useEffect(() => {
     if (searchResetRef.current) {
@@ -107,9 +116,11 @@ export default function ProductsPage() {
           price: editProduct.price,
           stock: editProduct.stock,
           minStock: editProduct.minStock,
-          category: editProduct.category?._id,
+          category: (editProduct.category as Category)?._id ?? editProduct.category,
           isRFID: editProduct.isRFID,
           isActive: editProduct.isActive,
+          image: editProduct.image,
+          imagePublicId: editProduct.imagePublicId,
         }),
       });
 
@@ -126,14 +137,15 @@ export default function ProductsPage() {
   };
 
   const handleDelete = async (product: Product) => {
-    const confirmed = window.confirm(
-      `¿Estás seguro de eliminar el producto "${product.name}"? Esta acción no se puede deshacer.`
-    );
+    setDeleteTarget(product);
+  };
 
-    if (!confirmed) return;
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
 
     try {
-      const res = await fetch(`/api/products/${product._id}`, {
+      const res = await fetch(`/api/products/${deleteTarget._id}`, {
         method: "DELETE",
       });
 
@@ -143,13 +155,21 @@ export default function ProductsPage() {
       refreshProducts();
     } catch {
       toast.error("Error al eliminar el producto");
+    } finally {
+      setDeleting(false);
+      setDeleteTarget(null);
     }
   };
 
   if (loading) {
     return (
-      <div className="w-full px-4 text-neutral-400">
-        Cargando productos...
+      <div className="w-full overflow-x-hidden px-4 md:px-6 text-white max-w-screen-xl mx-auto space-y-8">
+        <div className="rounded-3xl border border-cyan-700 bg-gradient-to-r from-cyan-950 via-slate-950 to-slate-900 p-6">
+          <Skeleton className="h-4 w-48 mb-2" />
+          <Skeleton className="h-8 w-72 mb-2" />
+          <Skeleton className="h-4 w-96" />
+        </div>
+        <TableSkeleton rows={6} />
       </div>
     );
   }
@@ -175,8 +195,41 @@ export default function ProductsPage() {
         </div>
       </div>
 
-      <div className="w-full">
-        <SearchBar initialValue={search} onSearch={setSearch} debounceMs={300} placeholder="Buscar por nombre, código o EPC..." />
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex-1 space-y-3">
+          <SearchBar initialValue={search} onSearch={setSearch} debounceMs={300} placeholder="Buscar por nombre, código o EPC..." />
+          <div className="flex gap-2">
+            <input
+              type="number"
+              placeholder="Stock mín."
+              value={stockMin}
+              onChange={(e) => setStockMin(e.target.value)}
+              className="w-28 rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-1.5 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-cyan-500"
+            />
+            <input
+              type="number"
+              placeholder="Stock máx."
+              value={stockMax}
+              onChange={(e) => setStockMax(e.target.value)}
+              className="w-28 rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-1.5 text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-cyan-500"
+            />
+            {(stockMin || stockMax) && (
+              <button
+                onClick={() => { setStockMin(""); setStockMax(""); }}
+                className="rounded-lg border border-neutral-700 px-3 py-1.5 text-sm text-neutral-400 hover:text-white transition"
+              >
+                Limpiar
+              </button>
+            )}
+          </div>
+        </div>
+        <a
+          href="/api/products/export"
+          className="inline-flex items-center gap-2 rounded-2xl border border-neutral-700 bg-neutral-900 px-4 py-2.5 text-sm font-medium text-neutral-200 transition hover:border-cyan-500 hover:text-white shrink-0"
+        >
+          <Download size={16} />
+          Exportar CSV
+        </a>
       </div>
 
       <div className="flex flex-col gap-2 text-sm text-neutral-400">
@@ -188,27 +241,38 @@ export default function ProductsPage() {
         </p>
       </div>
 
-      <div className="md:hidden w-full overflow-hidden">
-        <ProductsMobile
-          products={displayedProducts}
-          savedRow={savedRow}
-          updateStock={updateStock}
-          saveStock={saveStock}
-          onEdit={setEditProduct}
-          onDelete={handleDelete}
-        />
-      </div>
+      {displayedProducts.length === 0 ? (
+        <div className="rounded-2xl border border-neutral-800 bg-neutral-950/50 p-8 text-center">
+          <p className="text-neutral-400">No hay productos que coincidan con tu búsqueda.</p>
+          <p className="text-sm text-neutral-600 mt-1">
+            {search ? "Intenta con otro término." : "Agrega productos desde el botón + Crear producto."}
+          </p>
+        </div>
+      ) : (
+        <>
+          <div className="md:hidden w-full overflow-hidden">
+            <ProductsMobile
+              products={displayedProducts}
+              savedRow={savedRow}
+              updateStock={updateStock}
+              saveStock={saveStock}
+              onEdit={setEditProduct}
+              onDelete={handleDelete}
+            />
+          </div>
 
-      <div className="hidden md:block w-full overflow-x-auto">
-        <ProductsTable
-          products={displayedProducts}
-          savedRow={savedRow}
-          updateStock={updateStock}
-          saveStock={saveStock}
-          onEdit={setEditProduct}
-          onDelete={handleDelete}
-        />
-      </div>
+          <div className="hidden md:block w-full overflow-x-auto">
+            <ProductsTable
+              products={displayedProducts}
+              savedRow={savedRow}
+              updateStock={updateStock}
+              saveStock={saveStock}
+              onEdit={setEditProduct}
+              onDelete={handleDelete}
+            />
+          </div>
+        </>
+      )}
 
       {pageCount > 1 && (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-3xl border border-neutral-800 bg-slate-950/50 px-4 py-4 text-sm text-neutral-300 shadow-lg shadow-cyan-500/10">
@@ -274,6 +338,16 @@ export default function ProductsPage() {
           onSave={saveEdit}
         />
       )}
+
+      <ConfirmModal
+        open={!!deleteTarget}
+        title="Eliminar producto"
+        message={deleteTarget ? `¿Estás seguro de eliminar "${deleteTarget.name}"? Esta acción no se puede deshacer.` : ""}
+        confirmLabel="Eliminar"
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteTarget(null)}
+        loading={deleting}
+      />
 
       <ScrollToTop />
     </div>

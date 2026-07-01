@@ -82,23 +82,23 @@ const cards = [
 
 export default function StatsCards(props: Props) {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
       {cards.map((card) => {
         const Icon = card.icon;
         const val = props[card.value as keyof Props] as number;
         return (
           <div
             key={card.value}
-            className={`p-6 rounded-3xl bg-gradient-to-br ${card.gradient} border ${card.border} shadow-sm space-y-3`}
+            className={`p-4 md:p-6 rounded-3xl bg-gradient-to-br ${card.gradient} border ${card.border} shadow-sm space-y-3`}
           >
             <div className="flex items-center justify-between">
-              <p className={`text-sm uppercase ${card.labelColor} tracking-[0.18em]`}>
+              <p className={`text-xs md:text-sm uppercase ${card.labelColor} tracking-wider`}>
                 {card.label}
               </p>
-              <Icon size={22} className={card.labelColor} />
+              <Icon size={20} className={`${card.labelColor} shrink-0`} />
             </div>
-            <p className={`text-4xl font-semibold ${card.valueColor}`}>{val}</p>
-            <p className={`text-sm ${card.descColor}`}>{card.desc}</p>
+            <p className={`text-3xl md:text-4xl font-semibold ${card.valueColor}`}>{val}</p>
+            <p className={`text-xs md:text-sm ${card.descColor}`}>{card.desc}</p>
           </div>
         );
       })}

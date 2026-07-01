@@ -2,11 +2,22 @@ import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Product from "@/models/Product";
 import Category from "@/models/Category";
+import cloudinary from "@/lib/cloudinary";
+import { requireAdmin } from "@/lib/require-admin";
+
+function extractPublicIdFromUrl(url: string): string | null {
+  if (!url) return null;
+  const m = url.match(/\/image\/upload\/(?:v\d+\/)?(.+?)\.[^.]+$/);
+  return m ? m[1] : null;
+}
 
 export async function PUT(
   req: Request,
   context: { params: Promise<{ id: string }> }
 ) {
+  const unauthorized = await requireAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     await connectDB();
 
@@ -46,7 +57,9 @@ export async function PUT(
       minStock,
       category,
       isActive,
-      isRFID, // 🔥 RFID ON / OFF
+      isRFID,
+      image,
+      imagePublicId,
     } = body;
 
     // 🔴 Validaciones obligatorias
@@ -83,20 +96,35 @@ export async function PUT(
       );
     }
 
-    // ✅ Actualizar producto (incluye RFID)
+    // 📸 Eliminar imagen anterior de Cloudinary si se reemplaza
+    if (image && imagePublicId) {
+      const existing = await Product.findById(id).select("image imagePublicId");
+      if (existing) {
+        const oldPublicId = existing.imagePublicId || extractPublicIdFromUrl(existing.image);
+        if (oldPublicId) {
+          await cloudinary.uploader.destroy(oldPublicId);
+        }
+      }
+    }
+
+    // ✅ Actualizar producto
+    const updateData: Record<string, unknown> = {
+      code: code.trim(),
+      name,
+      description,
+      price,
+      stock,
+      minStock,
+      category,
+      isActive,
+      isRFID,
+    };
+    if (image !== undefined) updateData.image = image;
+    if (imagePublicId !== undefined) updateData.imagePublicId = imagePublicId;
+
     const updatedProduct = await Product.findByIdAndUpdate(
       id,
-      {
-        code: code.trim(),
-        name,
-        description,
-        price,
-        stock,
-        minStock,
-        category,
-        isActive,
-        isRFID, // 🔥 SE GUARDA EN MONGO
-      },
+      updateData,
       { new: true }
     ).populate("category", "name isActive");
 
@@ -121,18 +149,28 @@ export async function DELETE(
   req: Request,
   context: { params: Promise<{ id: string }> }
 ) {
+  const unauthorized = await requireAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     await connectDB();
 
     const { id } = await context.params;
-    const deleted = await Product.findByIdAndDelete(id);
+    const product = await Product.findById(id);
 
-    if (!deleted) {
+    if (!product) {
       return NextResponse.json(
         { error: "Producto no encontrado" },
         { status: 404 }
       );
     }
+
+    const publicId = product.imagePublicId || extractPublicIdFromUrl(product.image);
+    if (publicId) {
+      await cloudinary.uploader.destroy(publicId);
+    }
+
+    await Product.findByIdAndDelete(id);
 
     return NextResponse.json({ message: "Producto eliminado" });
   } catch (error) {

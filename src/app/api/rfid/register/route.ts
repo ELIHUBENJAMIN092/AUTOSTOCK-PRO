@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import RFIDTag from "@/models/RFIDTag";
+import { requireAdmin } from "@/lib/require-admin";
 import Product from "@/models/Product";
 
 export async function POST(req: Request) {
+  const unauthorized = await requireAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     await connectDB();
     const { epc, productId } = await req.json();

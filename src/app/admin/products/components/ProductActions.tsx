@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { Minus, Plus, Save, Check, Pencil, Trash2 } from "lucide-react";
-import type { Product } from "../types";
+import type { Product } from "@/types";
 
 interface Props {
   product: Product;

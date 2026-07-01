@@ -2,6 +2,12 @@ import mongoose, { Schema, models } from "mongoose";
 
 const UserSchema = new Schema(
   {
+    name: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
     email: {
       type: String,
       required: true,
@@ -21,6 +27,14 @@ const UserSchema = new Schema(
     isActive: {
       type: Boolean,
       default: true,
+    },
+    resetPasswordToken: {
+      type: String,
+      default: null,
+    },
+    resetPasswordExpires: {
+      type: Date,
+      default: null,
     },
   },
   {

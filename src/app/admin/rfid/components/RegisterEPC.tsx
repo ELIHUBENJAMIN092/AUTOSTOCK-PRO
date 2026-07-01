@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import toast from "react-hot-toast";
-import type { Product } from "@/app/admin/products/types";
+import type { Product } from "@/types";
 import Button from '@/app/components/ui/Button'
 
 interface Props {

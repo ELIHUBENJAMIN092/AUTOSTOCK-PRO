@@ -5,6 +5,7 @@ import RFIDTag from "@/models/RFIDTag";
 import Category from "@/models/Category";
 import cloudinary from "@/lib/cloudinary";
 import { z } from "zod";
+import { requireAdmin } from "@/lib/require-admin";
 
 /**
  * GET → listar productos
@@ -21,6 +22,8 @@ export async function GET(req: Request) {
     const q = url.searchParams.get("q")?.trim();
     const categoryFilter = url.searchParams.get("category")?.trim();
     const rfidFilter = url.searchParams.get("rfid")?.trim();
+    const stockMin = url.searchParams.get("stockMin")?.trim();
+    const stockMax = url.searchParams.get("stockMax")?.trim();
 
     // Construir filtro
     const filters: any = {};
@@ -31,6 +34,12 @@ export async function GET(req: Request) {
 
     if (rfidFilter === "true") {
       filters.isRFID = true;
+    }
+
+    if (stockMin || stockMax) {
+      filters.stock = {};
+      if (stockMin) filters.stock.$gte = Number(stockMin);
+      if (stockMax) filters.stock.$lte = Number(stockMax);
     }
 
     // Búsqueda por nombre o código
@@ -82,6 +91,9 @@ export async function GET(req: Request) {
  * POST → crear producto (FormData + imagen Cloudinary)
  */
 export async function POST(req: Request) {
+  const unauthorized = await requireAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     await connectDB();
 
@@ -147,6 +159,7 @@ export async function POST(req: Request) {
 
     // 📸 Validación y subida de imagen a Cloudinary (si viene)
     let image = "";
+    let imagePublicId = "";
 
     if (imageFile) {
       // Validar tipo y tamaño
@@ -174,6 +187,7 @@ export async function POST(req: Request) {
       });
 
       image = uploadResult.secure_url;
+      imagePublicId = uploadResult.public_id;
     }
 
     // ✅ Validaciones finales y creación de producto
@@ -200,6 +214,7 @@ export async function POST(req: Request) {
       minStock,
       category,
       image,
+      imagePublicId,
       isActive: true,
     });
 

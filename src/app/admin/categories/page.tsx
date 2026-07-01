@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import ScrollToTop from "@/app/components/ScrollToTop";
 import Button from '@/app/components/ui/Button'
+import { Skeleton } from '@/app/components/ui/Skeleton'
+import ConfirmModal from '@/app/components/ui/ConfirmModal'
 
 
 type Category = {
@@ -15,19 +17,24 @@ type Category = {
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
 
   // ✅ NUEVO: controlar si se muestran inactivas
   const [showInactive, setShowInactive] = useState(false);
+  const [toggleTarget, setToggleTarget] = useState<Category | null>(null);
 
   const fetchCategories = async () => {
+    setLoading(false);
     const res = await fetch("/api/categories");
     const data = await res.json();
     setCategories(data);
+    setLoading(false);
   };
 
   useEffect(() => {
+    setLoading(true);
     fetchCategories();
   }, []);
 
@@ -65,6 +72,12 @@ export default function CategoriesPage() {
     } catch {
       toast.error("Error al actualizar la categoría");
     }
+  };
+
+  const confirmToggle = async () => {
+    if (!toggleTarget) return;
+    await toggleCategory(toggleTarget._id);
+    setToggleTarget(null);
   };
 
   return (
@@ -123,6 +136,18 @@ export default function CategoriesPage() {
         </div>
       </div>
 
+      {loading ? (
+        <div className="space-y-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-20 w-full rounded-[1.5rem]" />
+          ))}
+        </div>
+      ) : categories.filter((cat) => showInactive || cat.isActive).length === 0 ? (
+        <div className="rounded-2xl border border-neutral-800 bg-neutral-950/50 p-8 text-center">
+          <p className="text-neutral-400">No hay categorías {showInactive ? "" : "activas"}.</p>
+          <p className="text-sm text-neutral-600 mt-1">Crea una categoría para comenzar.</p>
+        </div>
+      ) : (
       <ul className="grid gap-4">
         {categories
           .filter((cat) => showInactive || cat.isActive)
@@ -146,11 +171,21 @@ export default function CategoriesPage() {
 
               <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
                 <span className="text-sm text-neutral-500">ID: {cat._id.slice(0, 8)}...</span>
-                <Button onClick={() => toggleCategory(cat._id)} className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${cat.isActive ? "bg-rose-500 text-white hover:bg-rose-400" : "bg-emerald-500 text-slate-950 hover:bg-emerald-400"}`}>{cat.isActive ? "Desactivar" : "Activar"}</Button>
+                <Button onClick={() => setToggleTarget(cat)} className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${cat.isActive ? "bg-rose-500 text-white hover:bg-rose-400" : "bg-emerald-500 text-slate-950 hover:bg-emerald-400"}`}>{cat.isActive ? "Desactivar" : "Activar"}</Button>
               </div>
             </li>
           ))}
       </ul>
+      )}
+
+      <ConfirmModal
+        open={!!toggleTarget}
+        title={toggleTarget?.isActive ? "Desactivar categoría" : "Activar categoría"}
+        message={`¿Estás seguro de ${toggleTarget?.isActive ? "desactivar" : "activar"} la categoría "${toggleTarget?.name}"?`}
+        confirmLabel={toggleTarget?.isActive ? "Desactivar" : "Activar"}
+        onConfirm={confirmToggle}
+        onCancel={() => setToggleTarget(null)}
+      />
 
       <ScrollToTop />
     </div>

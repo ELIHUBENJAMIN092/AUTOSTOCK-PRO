@@ -26,6 +26,7 @@ async function createAdmin() {
   }
 
   await User.create({
+    name: "Administrador",
     email,
     password: hashedPassword,
     role: "admin",

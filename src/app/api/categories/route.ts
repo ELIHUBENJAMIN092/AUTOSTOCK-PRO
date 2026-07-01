@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Category from "@/models/Category";
+import { requireAdmin } from "@/lib/require-admin";
 
 // GET → listar categorías
 export async function GET() {
@@ -19,6 +20,9 @@ export async function GET() {
 
 // POST → crear categoría
 export async function POST(req: Request) {
+  const unauthorized = await requireAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     const { name, description } = await req.json();
 

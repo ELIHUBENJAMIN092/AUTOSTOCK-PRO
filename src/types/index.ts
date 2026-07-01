@@ -1,12 +1,13 @@
-export interface Category {
+export type Category = {
   _id: string;
   name: string;
+  description?: string;
   isActive?: boolean;
 }
 
-export interface Product {
+export type Product = {
   _id: string;
-  code: string;
+  code?: string;
   name: string;
   description?: string;
   price?: number;
@@ -14,13 +15,14 @@ export interface Product {
   minStock?: number;
   category?: Category | string;
   image?: string;
+  imagePublicId?: string;
   isActive?: boolean;
   isRFID?: boolean;
   createdAt?: string;
   updatedAt?: string;
 }
 
-export interface RFIDTag {
+export type RFIDTag = {
   _id: string;
   epc: string;
   product?: Product | string | null;

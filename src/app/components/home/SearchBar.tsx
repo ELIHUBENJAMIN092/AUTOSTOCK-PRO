@@ -1,5 +1,7 @@
 'use client'
 
+import { useState, useEffect } from 'react'
+
 interface SearchBarProps {
   initialValue?: string
   onSearch: (value: string) => void
@@ -13,17 +15,15 @@ export default function SearchBar({
   debounceMs = 300,
   placeholder = 'Buscar por nombre, número de parte o EPC...'
 }: SearchBarProps) {
-  const [value, setValue] = (globalThis as any).React?.useState?.(initialValue) ?? require('react').useState(initialValue)
+  const [value, setValue] = useState(initialValue)
 
-  // debounce
-  require('react').useEffect(() => {
+  useEffect(() => {
     const t = setTimeout(() => onSearch(value.trim()), debounceMs)
     return () => clearTimeout(t)
   }, [value, debounceMs, onSearch])
 
   return (
     <div className="w-full mb-6 relative">
-      {/* Icono búsqueda */}
       <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/70">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -41,7 +41,6 @@ export default function SearchBar({
         </svg>
       </span>
 
-      {/* Input */}
       <input
         value={value}
         onChange={(e) => setValue(e.target.value)}
@@ -51,7 +50,6 @@ export default function SearchBar({
           focus:outline-none focus:border-neutral-500"
       />
 
-      {/* Botón borrar */}
       {value && (
         <button
           onClick={() => setValue('')}

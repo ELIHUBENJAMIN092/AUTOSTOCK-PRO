@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import type { Product } from "../types";
+import type { Product } from "@/types";
 
 export function useProductSearch(products: Product[]) {
   const [search, setSearch] = useState("");

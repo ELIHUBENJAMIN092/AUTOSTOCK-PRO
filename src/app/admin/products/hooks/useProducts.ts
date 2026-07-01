@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
-import type { Product, Category } from "../types";
+import type { Product, Category } from "@/types";
 
 export function useProducts() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -12,6 +12,8 @@ export function useProducts() {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [limit] = useState(20);
+  const [stockMin, setStockMin] = useState("");
+  const [stockMax, setStockMax] = useState("");
   const pageRef = useRef(page);
 
   useEffect(() => {
@@ -25,6 +27,9 @@ export function useProducts() {
       params.set("q", query);
     }
 
+    if (stockMin) params.set("stockMin", stockMin);
+    if (stockMax) params.set("stockMax", stockMax);
+
     params.set("page", String(pageNumber));
     params.set("limit", String(limit));
 
@@ -33,7 +38,7 @@ export function useProducts() {
 
     setProducts(Array.isArray(data) ? data : data?.products ?? []);
     setTotal(typeof data?.total === "number" ? data.total : 0);
-  }, [limit]);
+  }, [limit, stockMin, stockMax]);
 
   const fetchCategories = async () => {
     const res = await fetch("/api/categories");
@@ -98,7 +103,11 @@ export function useProducts() {
     total,
     page,
     limit,
+    stockMin,
+    stockMax,
     setPage,
+    setStockMin,
+    setStockMax,
     updateStock,
     saveStock,
 

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/db";
 import Category from "@/models/Category";
+import { requireAdmin } from "@/lib/require-admin";
 
 /**
  * PATCH → Activar / Desactivar categoría (toggle)
@@ -9,6 +10,9 @@ export async function PATCH(
   request: Request,
   context: { params: Promise<{ id: string }> }
 ) {
+  const unauthorized = await requireAdmin();
+  if (unauthorized) return unauthorized;
+
   try {
     // ✅ FIX Next.js 15 / 16 (params es Promise)
     const { id } = await context.params;

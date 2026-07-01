@@ -1,11 +1,16 @@
 import { NextResponse } from "next/server";
 import csv from "csv-parser";
 import { Readable } from "stream";
+import { requireAdmin } from "@/lib/require-admin";
 import { connectDB } from "@/lib/db";
 import Product from "@/models/Product";
 import RFIDTag from "@/models/RFIDTag";
 
 export async function POST(req: Request) {
+  const unauthorized = await requireAdmin();
+  if (unauthorized) return unauthorized;
+
+
   const start = Date.now();
 
   try {
