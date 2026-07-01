@@ -26,7 +26,7 @@ export default function CreateProductPage() {
   }
 
   return (
-    <div className="w-full overflow-x-hidden px-4 md:px-6 text-white max-w-5xl mx-auto space-y-8">
+    <div className="w-full overflow-x-hidden px-4 md:px-6 text-white max-w-screen-xl mx-auto space-y-8">
       <div className="rounded-[2rem] border border-cyan-700/40 bg-gradient-to-r from-cyan-950 via-slate-950 to-slate-900 p-6 shadow-xl shadow-cyan-500/15">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-2">

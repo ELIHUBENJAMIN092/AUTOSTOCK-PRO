@@ -155,7 +155,7 @@ export default function ProductsPage() {
   }
 
   return (
-    <div className="w-full max-w-full overflow-x-hidden px-4 text-white mx-auto space-y-8">
+    <div className="w-full overflow-x-hidden px-4 md:px-6 text-white max-w-screen-xl mx-auto space-y-8">
       <div className="rounded-3xl border border-cyan-700 bg-gradient-to-r from-cyan-950 via-slate-950 to-slate-900 p-6 shadow-lg shadow-cyan-500/20">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -211,7 +211,7 @@ export default function ProductsPage() {
       </div>
 
       {pageCount > 1 && (
-        <div className="flex flex-wrap items-center justify-between gap-4 rounded-3xl border border-neutral-800 bg-slate-950/50 px-4 py-4 text-sm text-neutral-300 shadow-lg shadow-cyan-500/10">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-3xl border border-neutral-800 bg-slate-950/50 px-4 py-4 text-sm text-neutral-300 shadow-lg shadow-cyan-500/10">
           <p>
             Mostrando página <span className="font-semibold text-white">{page}</span> de <span className="font-semibold text-white">{pageCount}</span>
           </p>
@@ -228,7 +228,7 @@ export default function ProductsPage() {
               Anterior
             </Button>
 
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="hidden sm:flex flex-wrap items-center gap-2">
               {pageNumbers.map((pageNumber, index) =>
                 typeof pageNumber === "number" ? (
                   <Button

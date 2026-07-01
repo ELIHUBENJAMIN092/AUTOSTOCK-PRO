@@ -4,6 +4,7 @@ import CategoriesSection from './components/home/CategoriesSection'
 import Inventory from './components/home/Inventory'
 import Footer from './components/layout/Footer'
 import ScrollToTop from './components/ScrollToTop'
+import WhatsAppButton from './components/WhatsAppButton'
 
 export default function HomePage() {
   return (
@@ -22,6 +23,9 @@ export default function HomePage() {
 
       {/* BOTÓN SCROLL */}
       <ScrollToTop />
+
+      {/* WHATSAPP */}
+      <WhatsAppButton />
 
       {/* FOOTER */}
       <Footer />
