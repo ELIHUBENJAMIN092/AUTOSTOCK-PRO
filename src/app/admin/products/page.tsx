@@ -163,7 +163,7 @@ export default function ProductsPage() {
 
   if (loading) {
     return (
-      <div className="w-full overflow-x-hidden px-4 md:px-6 text-white max-w-screen-xl mx-auto space-y-8">
+      <div className="w-full overflow-x-hidden text-white space-y-8">
         <div className="rounded-3xl border border-cyan-700 bg-gradient-to-r from-cyan-950 via-slate-950 to-slate-900 p-6">
           <Skeleton className="h-4 w-48 mb-2" />
           <Skeleton className="h-8 w-72 mb-2" />
@@ -175,7 +175,7 @@ export default function ProductsPage() {
   }
 
   return (
-    <div className="w-full overflow-x-hidden px-4 md:px-6 text-white max-w-screen-xl mx-auto space-y-8">
+    <div className="w-full overflow-x-hidden text-white space-y-8">
       <div className="rounded-3xl border border-cyan-700 bg-gradient-to-r from-cyan-950 via-slate-950 to-slate-900 p-6 shadow-lg shadow-cyan-500/20">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>

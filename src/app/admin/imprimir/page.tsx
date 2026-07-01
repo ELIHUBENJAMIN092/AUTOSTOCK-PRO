@@ -203,7 +203,7 @@ export default function PrintInventoryPage() {
   };
 
   return (
-    <div className="w-full overflow-x-hidden px-4 md:px-6 py-6 text-white max-w-screen-xl mx-auto space-y-8">
+    <div className="w-full overflow-x-hidden text-white space-y-8">
       <div className="rounded-[2rem] border border-sky-700/30 bg-gradient-to-r from-slate-950 via-sky-950 to-slate-900 p-4 md:p-6 shadow-xl shadow-sky-500/10">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
@@ -257,12 +257,12 @@ export default function PrintInventoryPage() {
         </div>
 
         <div className="mt-4 overflow-x-auto rounded-3xl border border-neutral-800 bg-slate-950 p-3 text-sm text-neutral-100">
-          <div className="grid grid-cols-[1.2fr_3fr_0.8fr] gap-4 min-w-[300px] border-b border-neutral-800 pb-3 text-xs uppercase tracking-[0.2em] text-neutral-500">
+          <div className="grid grid-cols-[1.2fr_3fr_0.8fr] gap-4 border-b border-neutral-800 pb-3 text-xs uppercase tracking-[0.2em] text-neutral-500">
             <span>Código</span>
             <span>Producto</span>
             <span className="text-right">Stock</span>
           </div>
-          <div className="space-y-2 mt-3 min-w-[300px]">
+          <div className="space-y-2 mt-3">
             {products.slice(0, 8).map((p) => (
               <div key={p._id} className="grid grid-cols-[1.2fr_3fr_0.8fr] gap-4 text-sm text-neutral-200">
                 <span>{p.code || "-"}</span>

@@ -81,7 +81,7 @@ export default function CategoriesPage() {
   };
 
   return (
-    <div className="w-full overflow-x-hidden px-4 md:px-6 text-white max-w-screen-xl mx-auto py-6">
+    <div className="w-full overflow-x-hidden text-white">
       <div className="mb-8 overflow-hidden rounded-[2rem] bg-gradient-to-r from-slate-950 via-cyan-950 to-slate-900 p-6 shadow-2xl shadow-cyan-500/10">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>

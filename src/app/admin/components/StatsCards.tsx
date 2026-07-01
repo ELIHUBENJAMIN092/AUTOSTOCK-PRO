@@ -21,7 +21,7 @@ const cards = [
     labelColor: "text-sky-300",
     valueColor: "text-white",
     descColor: "text-sky-200",
-    desc: "Incluye productos activos e inactivos.",
+    desc: "Incluye activos e inactivos.",
   },
   {
     label: "Productos activos",
@@ -32,7 +32,7 @@ const cards = [
     labelColor: "text-emerald-300",
     valueColor: "text-white",
     descColor: "text-emerald-200",
-    desc: "Productos disponibles para venta.",
+    desc: "Disponibles para venta.",
   },
   {
     label: "Productos RFID",
@@ -43,7 +43,7 @@ const cards = [
     labelColor: "text-violet-300",
     valueColor: "text-white",
     descColor: "text-violet-200",
-    desc: "Productos con control RFID activado.",
+    desc: "Control RFID activado.",
   },
   {
     label: "Categorías",
@@ -54,7 +54,7 @@ const cards = [
     labelColor: "text-amber-300",
     valueColor: "text-white",
     descColor: "text-amber-200",
-    desc: "Categorías creadas en el catálogo.",
+    desc: "Categorías en el catálogo.",
   },
   {
     label: "Etiquetas RFID",
@@ -65,7 +65,7 @@ const cards = [
     labelColor: "text-fuchsia-300",
     valueColor: "text-white",
     descColor: "text-fuchsia-200",
-    desc: "Tags RFID registrados en el sistema.",
+    desc: "Tags RFID registrados.",
   },
   {
     label: "Stock bajo",
@@ -76,29 +76,29 @@ const cards = [
     labelColor: "text-rose-300",
     valueColor: "text-white",
     descColor: "text-rose-200",
-    desc: "Productos con stock menor o igual a 5.",
+    desc: "Stock menor o igual a 5.",
   },
 ];
 
 export default function StatsCards(props: Props) {
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-3">
       {cards.map((card) => {
         const Icon = card.icon;
         const val = props[card.value as keyof Props] as number;
         return (
           <div
             key={card.value}
-            className={`p-4 md:p-6 rounded-3xl bg-gradient-to-br ${card.gradient} border ${card.border} shadow-sm space-y-3`}
+            className={`min-w-0 p-3 md:p-4 rounded-2xl bg-gradient-to-br ${card.gradient} border ${card.border} shadow-sm space-y-1`}
           >
-            <div className="flex items-center justify-between">
-              <p className={`text-xs md:text-sm uppercase ${card.labelColor} tracking-wider`}>
-                {card.label}
-              </p>
-              <Icon size={20} className={`${card.labelColor} shrink-0`} />
+            <p className={`text-[10px] md:text-xs uppercase ${card.labelColor} tracking-wider truncate`}>
+              {card.label}
+            </p>
+            <div className="flex items-center gap-1.5">
+              <span className={`text-xl md:text-2xl font-semibold ${card.valueColor}`}>{val}</span>
+              <Icon size={16} className={`${card.labelColor} shrink-0`} />
             </div>
-            <p className={`text-3xl md:text-4xl font-semibold ${card.valueColor}`}>{val}</p>
-            <p className={`text-xs md:text-sm ${card.descColor}`}>{card.desc}</p>
+            <p className={`text-[10px] md:text-xs leading-tight ${card.descColor}`}>{card.desc}</p>
           </div>
         );
       })}

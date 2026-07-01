@@ -116,10 +116,12 @@ export default function AdminLayout({
 
       {/* CONTENIDO */}
       <main
-        className="flex-1 min-h-screen p-4 md:p-8 max-w-screen-xl mx-auto overflow-x-hidden"
+        className="flex-1 min-w-0 w-full overflow-x-hidden min-h-screen"
         onClick={() => menuOpen && setMenuOpen(false)}
       >
-        {children}
+        <div className="mx-auto w-full max-w-screen-xl p-4 md:p-8">
+          {children}
+        </div>
       </main>
 
     </div>

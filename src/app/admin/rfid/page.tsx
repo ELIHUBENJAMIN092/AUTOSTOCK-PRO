@@ -169,7 +169,7 @@ export default function RFIDPage() {
   };
 
   return (
-    <div className="w-full overflow-x-hidden px-4 md:px-6 text-white max-w-screen-xl mx-auto space-y-10">
+    <div className="w-full overflow-x-hidden text-white space-y-10">
 
       <div className="rounded-[2rem] border border-cyan-700/30 bg-gradient-to-r from-slate-950 via-cyan-950 to-slate-900 p-6 shadow-xl shadow-cyan-500/10">
         <h1 className="text-3xl font-bold text-white">Inventario RFID</h1>

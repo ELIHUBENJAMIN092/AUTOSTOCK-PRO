@@ -79,7 +79,7 @@ export default function MessagesPage() {
   };
 
   return (
-    <div className="w-full overflow-x-hidden px-4 md:px-6 text-white max-w-screen-xl mx-auto space-y-6">
+    <div className="w-full overflow-x-hidden text-white space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-white">Consultas</h2>
